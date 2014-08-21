@@ -3,6 +3,7 @@ package net.whistlingfish.harmony.protocol;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.whistlingfish.harmony.protocol.GetConfig.GetConfigReplyParser;
 import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityReplyParser;
 import net.whistlingfish.harmony.protocol.HoldAction.HoldActionReplyParser;
 
@@ -16,7 +17,7 @@ public class OAReplyProvider implements IQProvider {
     private static Map<String, OAReplyParser> replyParsers = new HashMap<>();
     static {
         replyParsers.put(AuthReply.MIME_TYPE, new AuthReplyParser());
-        replyParsers.put(GetConfigReply.MIME_TYPE, new GetConfigReplyParser());
+        replyParsers.put(GetConfig.MIME_TYPE, new GetConfigReplyParser());
         replyParsers.put(HoldAction.MIME_TYPE, new HoldActionReplyParser());
         replyParsers.put(GetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
     }
