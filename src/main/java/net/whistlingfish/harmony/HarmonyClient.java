@@ -1,15 +1,20 @@
 package net.whistlingfish.harmony;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.config.HarmonyConfig;
 import net.whistlingfish.harmony.protocol.AuthReply;
 import net.whistlingfish.harmony.protocol.AuthRequest;
 import net.whistlingfish.harmony.protocol.AuthService;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
 import net.whistlingfish.harmony.protocol.GetConfigReply;
 import net.whistlingfish.harmony.protocol.GetConfigRequest;
+import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityReply;
+import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityRequest;
 import net.whistlingfish.harmony.protocol.LoginToken;
 import net.whistlingfish.harmony.protocol.OA;
 import net.whistlingfish.harmony.protocol.OAReplyFilter;
@@ -42,6 +47,8 @@ public class HarmonyClient {
 
     @Inject
     private AuthService authService;
+
+    private HarmonyConfig config;
 
     /*
      * FIXME: Wrap Smack exceptions
@@ -77,13 +84,14 @@ public class HarmonyClient {
     }
 
     private Packet sendOAPacket(XMPPTCPConnection authConnection, OA packet) {
-        PacketCollector collector = authConnection.createPacketCollector(new EmptyIncrementedIdReplyFilter(packet, authConnection));
+        PacketCollector collector = authConnection.createPacketCollector(new EmptyIncrementedIdReplyFilter(packet,
+                authConnection));
         try {
             authConnection.sendPacket(packet);
             // Packet reply = collector.nextResultOrThrow();
             Packet reply = collector.nextResultBlockForever();
             return reply;
-        } catch (/*XMPPException | */SmackException e) {
+        } catch (/* XMPPException | */SmackException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
         } finally {
             collector.cancel();
@@ -132,8 +140,12 @@ public class HarmonyClient {
         return config;
     }
 
-    public String getConfig() {
-        return sendOAPacket(connection, new GetConfigRequest(), GetConfigReply.class).getConfig();
+    public HarmonyConfig getConfig() {
+        if (config == null) {
+            config = HarmonyConfig.parse(sendOAPacket(connection, new GetConfigRequest(), GetConfigReply.class)
+                    .getConfig());
+        }
+        return config;
     }
 
     private AuthRequest createSessionRequest(LoginToken loginToken) {
@@ -148,5 +160,15 @@ public class HarmonyClient {
             throw new RuntimeException(e);
         }
         sendOAPacket(connection, new ReleaseButtonRequest(button));
+    }
+
+    public Map<String, String> getDeviceLabels() {
+        return getConfig().getDeviceLabels();
+    }
+
+    public Activity getCurrentActivity() {
+        GetCurrentActivityReply reply = sendOAPacket(connection, new GetCurrentActivityRequest(), GetCurrentActivityReply.class);
+        HarmonyConfig config = getConfig();
+        return config.getActivityById(reply.getResult());
     }
 }

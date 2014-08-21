@@ -7,16 +7,14 @@ import org.kohsuke.args4j.spi.SubCommand;
 import org.kohsuke.args4j.spi.SubCommandHandler;
 import org.kohsuke.args4j.spi.SubCommands;
 
-public class ShellCommandWrapper {
+public class ListCommand extends ShellCommand {
     @Argument(handler = SubCommandHandler.class)
-    @SubCommands({ @SubCommand(name = "get_config", impl = GetConfigCommand.class),
-                  @SubCommand(name = "press", impl = PressButtonCommand.class),
-                  @SubCommand(name = "list", impl = ListCommand.class),
-                  @SubCommand(name = "show", impl = ShowCommand.class),
-                  })
+    @SubCommands({ @SubCommand(name = "devices", impl = ListDevicesCommand.class) })
     private ShellCommand command;
 
+    @Override
     public void execute(HarmonyClient harmonyClient) {
         command.execute(harmonyClient);
     }
+
 }
