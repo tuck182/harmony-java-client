@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 import javax.inject.Inject;
 
-import net.whistlingfish.harmony.shell.ListDevicesCommand;
+import net.whistlingfish.harmony.shell.ListActivitiesCommand;
 import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 import net.whistlingfish.harmony.shell.ShowActivityCommand;
 
@@ -37,7 +37,7 @@ public class Main {
 
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        new ListDevicesCommand().execute(harmonyClient);
+        new ListActivitiesCommand().execute(harmonyClient);
         new ShowActivityCommand().execute(harmonyClient);
 
         String line;

@@ -7,20 +7,20 @@ import javax.inject.Inject;
 
 import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.config.HarmonyConfig;
-import net.whistlingfish.harmony.protocol.MessageAuth.AuthReply;
-import net.whistlingfish.harmony.protocol.MessageAuth.AuthRequest;
 import net.whistlingfish.harmony.protocol.AuthService;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
+import net.whistlingfish.harmony.protocol.LoginToken;
+import net.whistlingfish.harmony.protocol.MessageAuth.AuthReply;
+import net.whistlingfish.harmony.protocol.MessageAuth.AuthRequest;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReply;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigRequest;
 import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityReply;
 import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityRequest;
 import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionRequest;
-import net.whistlingfish.harmony.protocol.LoginToken;
-import net.whistlingfish.harmony.protocol.OA;
-import net.whistlingfish.harmony.protocol.OAReplyFilter;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReply;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityRequest;
+import net.whistlingfish.harmony.protocol.OAPacket;
+import net.whistlingfish.harmony.protocol.OAReplyFilter;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
@@ -73,7 +73,6 @@ public class HarmonyClient {
             AuthRequest sessionRequest = createSessionRequest(loginToken);
             AuthReply oaResponse = sendOAPacket(authConnection, sessionRequest, AuthReply.class);
 
-            logger.debug("Got session response: {}", oaResponse);
             authConnection.disconnect();
 
             connection = new XMPPTCPConnection(connectionConfig);
@@ -87,14 +86,12 @@ public class HarmonyClient {
         }
     }
 
-    private Packet sendOAPacket(XMPPTCPConnection authConnection, OA packet) {
+    private Packet sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet) {
         PacketCollector collector = authConnection.createPacketCollector(new EmptyIncrementedIdReplyFilter(packet,
                 authConnection));
         try {
             authConnection.sendPacket(packet);
-            // Packet reply = collector.nextResultOrThrow();
-            Packet reply = collector.nextResultBlockForever();
-            return reply;
+            return getNextPacketSkipContinues(collector);
         } catch (/* XMPPException | */SmackException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
         } finally {
@@ -102,17 +99,28 @@ public class HarmonyClient {
         }
     }
 
-    private <R extends OA> R sendOAPacket(XMPPTCPConnection authConnection, OA packet, Class<R> replyClass) {
+    private <R extends OAPacket> R sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet, Class<R> replyClass) {
         PacketCollector collector = authConnection.createPacketCollector(new OAReplyFilter(packet, authConnection));
         try {
             authConnection.sendPacket(packet);
-            Packet reply = collector.nextResultOrThrow();
-            // Packet reply = collector.nextResultBlockForever();
-            return replyClass.cast(reply);
-        } catch (XMPPException | SmackException e) {
+            return replyClass.cast(getNextPacketSkipContinues(collector));
+        } catch (SmackException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
         } finally {
             collector.cancel();
+        }
+    }
+
+    private Packet getNextPacketSkipContinues(PacketCollector collector) {
+        while (true) {
+            // Packet reply = collector.nextResultOrThrow();
+            Packet reply = collector.nextResultBlockForever();
+            if (!(reply instanceof OAPacket)) {
+                continue;
+            }
+            OAPacket oaReply = (OAPacket) reply;
+            if (!oaReply.isContinuePacket())
+                return reply;
         }
     }
 
@@ -126,13 +134,13 @@ public class HarmonyClient {
         authConnection.addPacketInterceptor(new PacketInterceptor() {
             @Override
             public void interceptPacket(Packet packet) {
-                logger.debug("{}>>> {}", prefix, packet);
+                logger.trace("{}>>> {}", prefix, packet);
             }
         }, allPacketsFilter);
         authConnection.addPacketListener(new PacketListener() {
             @Override
             public void processPacket(Packet packet) throws NotConnectedException {
-                logger.debug("<<<{} {}", prefix, packet);
+                logger.trace("<<<{} {}", prefix, packet);
             }
         }, allPacketsFilter);
     }
@@ -176,8 +184,8 @@ public class HarmonyClient {
         return config.getActivityById(reply.getResult());
     }
 
-    public void startActivity(int parseInt) {
-        sendOAPacket(connection, new StartActivityRequest(), StartActivityReply.class);
+    public void startActivity(int activityId) {
+        sendOAPacket(connection, new StartActivityRequest(activityId), StartActivityReply.class);
     }
 
     public void startActivityByName(String label) {

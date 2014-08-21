@@ -5,19 +5,20 @@ import java.util.UUID;
 
 import org.jivesoftware.smack.packet.IQ;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 
 import static java.lang.String.format;
 import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
-public class MessageAuth  {
+public class MessageAuth {
     public static String MIME_TYPE = "vnd.logitech.connect/vnd.logitech.pair";
 
     /*
      * Request
      */
-    public static class AuthRequest extends OA {
+    public static class AuthRequest extends OAPacket {
         private LoginToken loginToken;
 
         public AuthRequest(LoginToken loginToken) {
@@ -46,7 +47,7 @@ public class MessageAuth  {
     /*
      * Reply
      */
-    public static class AuthReply extends OA {
+    public static class AuthReply extends OAPacket {
         private String serverIdentity;
         private String hubId;
         private String identity;
@@ -56,6 +57,7 @@ public class MessageAuth  {
         private String productId;
         private String friendlyName;
 
+        @JsonCreator
         public AuthReply() {
             super(MIME_TYPE);
         }
@@ -120,8 +122,8 @@ public class MessageAuth  {
      */
     public static class AuthReplyParser extends OAReplyParser {
         @Override
-        public IQ parseReplyContents(String contents) {
-            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(contents), AuthReply.class);
+        public IQ parseReplyContents(String statusCode, String errorString, String contents) {
+            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(statusCode, errorString, contents), AuthReply.class);
         }
     }
 }

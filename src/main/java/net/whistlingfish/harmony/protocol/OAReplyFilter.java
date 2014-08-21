@@ -28,7 +28,7 @@ public class OAReplyFilter implements PacketFilter {
     private final String server;
     private final String packetId;
 
-    public OAReplyFilter(OA request, XMPPConnection connection) {
+    public OAReplyFilter(OAPacket request, XMPPConnection connection) {
         to = request.getTo();
         if (connection.getUser() == null) {
             // We have not yet been assigned a username, this can happen if the connection is

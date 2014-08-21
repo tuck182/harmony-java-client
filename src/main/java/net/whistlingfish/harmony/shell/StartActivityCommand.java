@@ -2,7 +2,10 @@ package net.whistlingfish.harmony.shell;
 
 import net.whistlingfish.harmony.HarmonyClient;
 
+import org.kohsuke.args4j.Argument;
+
 public class StartActivityCommand extends ShellCommand {
+    @Argument(required = true)
     private String activity;
 
     @Override
@@ -12,5 +15,6 @@ public class StartActivityCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             harmonyClient.startActivityByName(activity);
         }
+        println("Activity %s started", activity);
     }
 }

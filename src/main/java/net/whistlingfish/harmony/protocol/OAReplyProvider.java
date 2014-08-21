@@ -1,12 +1,15 @@
 package net.whistlingfish.harmony.protocol;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthReplyParser;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReplyParser;
 import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityReplyParser;
 import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionReplyParser;
+import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReplyParser;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
@@ -21,6 +24,13 @@ public class OAReplyProvider implements IQProvider {
         replyParsers.put(MessageGetConfig.MIME_TYPE, new GetConfigReplyParser());
         replyParsers.put(MessageHoldAction.MIME_TYPE, new HoldActionReplyParser());
         replyParsers.put(MessageGetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
+        replyParsers.put(MessageStartActivity.MIME_TYPE, new StartActivityReplyParser());
+    }
+
+    private static Set<String> validResponses = new HashSet<>();
+    static {
+        validResponses.add("100");
+        validResponses.add("200");
     }
 
     @Override
@@ -36,8 +46,10 @@ public class OAReplyProvider implements IQProvider {
                 attrs.put(parser.getAttributeName(i), parser.getAttributeValue(i));
             }
         }
-        if (!"200".equals(attrs.get("errorcode"))) {
-            throw new HarmonyProtocolException(format("Got error response [%s]: %s", attrs.get("errorcode"),
+        String statusCode = attrs.get("errorcode");
+        String errorString = attrs.get("errorstring");
+        if (!validResponses.contains(statusCode)) {
+            throw new HarmonyProtocolException(format("Got error response [%s]: %s", statusCode,
                     attrs.get("errorstring")));
         }
 
@@ -62,6 +74,6 @@ public class OAReplyProvider implements IQProvider {
                 break;
             }
         }
-        return replyParser.parseReplyContents(contents.toString());
+        return replyParser.parseReplyContents(statusCode, errorString, contents.toString());
     }
 }

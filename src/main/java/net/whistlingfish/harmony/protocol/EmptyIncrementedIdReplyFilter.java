@@ -16,22 +16,22 @@ import static java.lang.String.format;
 
 public class EmptyIncrementedIdReplyFilter implements PacketFilter {
 
-    private final AndFilter iqAndIdFilter;
+    private final AndFilter filter;
 
-    public EmptyIncrementedIdReplyFilter(OA request, XMPPTCPConnection connection) {
+    public EmptyIncrementedIdReplyFilter(OAPacket request, XMPPTCPConnection connection) {
         PacketFilter iqFilter = new OrFilter(new IQTypeFilter(IQ.Type.ERROR), new IQTypeFilter(IQ.Type.GET));
         PacketFilter idFilter = new PacketIDFilter(incrementPacketId(request));
-        iqAndIdFilter = new AndFilter(iqFilter, idFilter);
+        filter = new AndFilter(iqFilter, idFilter);
     }
 
     @Override
     public boolean accept(Packet packet) {
-        return iqAndIdFilter.accept(packet);
+        return filter.accept(packet);
     }
 
     private Pattern numericIdRE = Pattern.compile("^(.*?)(\\d+)$");
 
-    private String incrementPacketId(OA request) {
+    private String incrementPacketId(OAPacket request) {
         String packetId = request.getPacketID();
         Matcher matcher = numericIdRE.matcher(packetId);
         if (!matcher.matches()) {

@@ -29,7 +29,7 @@ public class MessageGetCurrentActivity {
     /*
      * Reply
      */
-    public static class GetCurrentActivityReply extends OA {
+    public static class GetCurrentActivityReply extends OAPacket {
         private int result;
 
         public GetCurrentActivityReply() {
@@ -38,7 +38,7 @@ public class MessageGetCurrentActivity {
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
-            return ImmutableMap.<String, Object>builder() //
+            return ImmutableMap.<String, Object> builder() //
                     .put("result", result)
                     .build();
         }
@@ -57,8 +57,9 @@ public class MessageGetCurrentActivity {
      */
     public static class GetCurrentActivityReplyParser extends OAReplyParser {
         @Override
-        public IQ parseReplyContents(String contents) {
-            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(contents), GetCurrentActivityReply.class);
+        public IQ parseReplyContents(String statusCode, String errorString, String contents) {
+            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(statusCode, errorString, contents),
+                    GetCurrentActivityReply.class);
         }
     }
 }

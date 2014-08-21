@@ -6,7 +6,6 @@ import org.jivesoftware.smack.packet.IQ;
 
 import com.google.common.collect.ImmutableMap;
 
-import static java.util.Collections.emptyMap;
 import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
 public class MessageStartActivity {
@@ -16,38 +15,45 @@ public class MessageStartActivity {
      * Request
      */
     public static class StartActivityRequest extends IrCommand {
-        public StartActivityRequest() {
+        private int activityId;
+
+        public StartActivityRequest(int activityId) {
             super(MIME_TYPE);
+            this.activityId = activityId;
         }
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
-            return emptyMap();
+            return ImmutableMap.<String, Object> builder() //
+                    .put("activityId", activityId)
+                    .put("timestamp", System.currentTimeMillis())
+                    .build();
         }
     }
 
     /*
-     * Reply
+     * Reply (unused)
      */
-    public static class StartActivityReply extends OA {
+    public static class StartActivityReply extends OAPacket {
         public StartActivityReply() {
             super(MIME_TYPE);
         }
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
-            return ImmutableMap.<String, Object>builder() //
+            return ImmutableMap.<String, Object> builder() //
                     .build();
         }
     }
 
     /*
-     * Parser
+     * Parser (unused)
      */
     public static class StartActivityReplyParser extends OAReplyParser {
         @Override
-        public IQ parseReplyContents(String contents) {
-            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(contents), StartActivityReply.class);
+        public IQ parseReplyContents(String statusCode, String errorString, String contents) {
+            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(statusCode, errorString, contents),
+                    StartActivityReply.class);
         }
 
     }

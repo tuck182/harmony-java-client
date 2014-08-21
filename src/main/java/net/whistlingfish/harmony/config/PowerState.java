@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum PowerState {
     ON("On"), OFF("Off");
 
-    private static Map<String, PowerState> valueMap = new HashMap<>();
+    private static Map<String, PowerState> valueMap;
 
     private final String description;
 

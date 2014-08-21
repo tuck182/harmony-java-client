@@ -39,9 +39,9 @@ public class MessageHoldAction {
     }
 
     /*
-     * Reply
+     * Reply (unused)
      */
-    public static class HoldActionReply extends OA {
+    public static class HoldActionReply extends OAPacket {
         public HoldActionReply() {
             super(MIME_TYPE);
         }
@@ -52,9 +52,12 @@ public class MessageHoldAction {
         }
     }
 
+    /*
+     * Parser (unused)
+     */
     public static class HoldActionReplyParser extends OAReplyParser {
         @Override
-        public IQ parseReplyContents(String contents) {
+        public IQ parseReplyContents(String statusCode, String errorString, String contents) {
             return new HoldActionReply();
         }
     }
@@ -62,7 +65,7 @@ public class MessageHoldAction {
     public enum HoldStatus {
         PRESS("press"), RELEASE("release");
 
-        private static Map<String, HoldStatus> valueMap = new HashMap<>();
+        private static Map<String, HoldStatus> valueMap;
 
         private final String description;
 

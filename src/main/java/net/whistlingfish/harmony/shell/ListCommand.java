@@ -9,7 +9,8 @@ import org.kohsuke.args4j.spi.SubCommands;
 
 public class ListCommand extends ShellCommand {
     @Argument(handler = SubCommandHandler.class)
-    @SubCommands({ @SubCommand(name = "devices", impl = ListDevicesCommand.class) })
+    @SubCommands({ @SubCommand(name = "devices", impl = ListDevicesCommand.class),
+        @SubCommand(name = "activities", impl = ListActivitiesCommand.class)})
     private ShellCommand command;
 
     @Override

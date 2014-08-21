@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 
 import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
-public abstract class IrCommand extends OA {
+public abstract class IrCommand extends OAPacket {
     public IrCommand(String mimeType) {
         super(mimeType);
     }

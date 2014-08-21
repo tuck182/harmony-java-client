@@ -10,15 +10,17 @@ import org.jivesoftware.smack.packet.IQ;
 import static java.lang.String.format;
 
 public abstract class OAReplyParser {
-    public abstract IQ parseReplyContents(String contents);
+    public abstract IQ parseReplyContents(String statusCode, String errorString, String contents);
     /*
      * FIXME: This parser could be far cleaner than it is, given the possibility of the pseudo-json components
      * containing colons, and the structure of them
      */
     static final Pattern kvRE = Pattern.compile("(.*?)=(.*)");
 
-    protected Map<String, Object> parseKeyValuePairs(String contents) {
+    protected Map<String, Object> parseKeyValuePairs(String statusCode, String errorString, String contents) {
         Map<String, Object> params = new HashMap<>();
+        params.put("statusCode", statusCode);
+        params.put("errorString", errorString);
         for (String pair : contents.split(":")) {
             Matcher matcher = kvRE.matcher(pair);
             if (!matcher.matches()) {
