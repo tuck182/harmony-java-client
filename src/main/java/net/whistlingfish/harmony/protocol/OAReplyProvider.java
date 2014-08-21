@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityReplyParser;
+import net.whistlingfish.harmony.protocol.HoldAction.HoldActionReplyParser;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
@@ -16,7 +17,7 @@ public class OAReplyProvider implements IQProvider {
     static {
         replyParsers.put(AuthReply.MIME_TYPE, new AuthReplyParser());
         replyParsers.put(GetConfigReply.MIME_TYPE, new GetConfigReplyParser());
-        replyParsers.put(PressButtonReplyParser.MIME_TYPE, new PressButtonReplyParser());
+        replyParsers.put(HoldAction.MIME_TYPE, new HoldActionReplyParser());
         replyParsers.put(GetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
     }
 

@@ -9,14 +9,14 @@ import com.google.common.collect.ImmutableMap;
 import static java.util.Collections.emptyMap;
 import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
-public class GetCurrentActivity {
-    public static final String MIME_TYPE = "vnd.logitech.harmony/vnd.logitech.harmony.engine?getCurrentActivity";
+public class StartActivity {
+    public static final String MIME_TYPE = "vnd.logitech.harmony/vnd.logitech.harmony.engine?startactivity";
 
     /*
      * Request
      */
-    public static class GetCurrentActivityRequest extends IrCommand {
-        public GetCurrentActivityRequest() {
+    public static class StartActivityRequest extends IrCommand {
+        public StartActivityRequest() {
             super(MIME_TYPE);
         }
 
@@ -29,36 +29,27 @@ public class GetCurrentActivity {
     /*
      * Reply
      */
-    public static class GetCurrentActivityReply extends OA {
-        private int result;
-
-        public GetCurrentActivityReply() {
+    public static class StartActivityReply extends OA {
+        public StartActivityReply() {
             super(MIME_TYPE);
         }
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
             return ImmutableMap.<String, Object>builder() //
-                    .put("result", result)
                     .build();
-        }
-
-        public void setResult(int result) {
-            this.result = result;
-        }
-
-        public int getResult() {
-            return result;
         }
     }
 
     /*
      * Parser
      */
-    public static class GetCurrentActivityReplyParser extends OAReplyParser {
+    public static class StartActivityReplyParser extends OAReplyParser {
         @Override
         public IQ parseReplyContents(String contents) {
-            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(contents), GetCurrentActivityReply.class);
+            return OBJECT_MAPPER.convertValue(parseKeyValuePairs(contents), StartActivityReply.class);
         }
+
     }
+
 }

@@ -88,4 +88,12 @@ public class HarmonyConfig {
         }
         return null;
     }
+
+    public Activity getActivityByName(String label) {
+        for (Activity activity : activities) {
+            if (activity.getLabel().equals(label))
+                return activity;
+        }
+        return null;
+    }
 }

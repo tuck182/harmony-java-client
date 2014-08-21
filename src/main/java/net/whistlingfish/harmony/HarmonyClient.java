@@ -15,11 +15,12 @@ import net.whistlingfish.harmony.protocol.GetConfigReply;
 import net.whistlingfish.harmony.protocol.GetConfigRequest;
 import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityReply;
 import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityRequest;
+import net.whistlingfish.harmony.protocol.HoldAction.HoldActionRequest;
 import net.whistlingfish.harmony.protocol.LoginToken;
 import net.whistlingfish.harmony.protocol.OA;
 import net.whistlingfish.harmony.protocol.OAReplyFilter;
-import net.whistlingfish.harmony.protocol.PressButtonReplyParser.PressButtonRequest;
-import net.whistlingfish.harmony.protocol.ReleaseButtonReplyParser.ReleaseButtonRequest;
+import net.whistlingfish.harmony.protocol.StartActivity.StartActivityReply;
+import net.whistlingfish.harmony.protocol.StartActivity.StartActivityRequest;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
@@ -35,6 +36,9 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static net.whistlingfish.harmony.protocol.HoldAction.HoldStatus.PRESS;
+import static net.whistlingfish.harmony.protocol.HoldAction.HoldStatus.RELEASE;
 
 public class HarmonyClient {
     private static Logger logger = LoggerFactory.getLogger(HarmonyClient.class);
@@ -152,14 +156,14 @@ public class HarmonyClient {
         return new AuthRequest(loginToken);
     }
 
-    public void pressButton(String button) {
-        sendOAPacket(connection, new PressButtonRequest(button));
+    public void pressButton(String deviceId, String button) {
+        sendOAPacket(connection, new HoldActionRequest(deviceId, button, PRESS));
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        sendOAPacket(connection, new ReleaseButtonRequest(button));
+        sendOAPacket(connection, new HoldActionRequest(deviceId, button, RELEASE));
     }
 
     public Map<String, String> getDeviceLabels() {
@@ -170,5 +174,13 @@ public class HarmonyClient {
         GetCurrentActivityReply reply = sendOAPacket(connection, new GetCurrentActivityRequest(), GetCurrentActivityReply.class);
         HarmonyConfig config = getConfig();
         return config.getActivityById(reply.getResult());
+    }
+
+    public void startActivity(int parseInt) {
+        sendOAPacket(connection, new StartActivityRequest(), StartActivityReply.class);
+    }
+
+    public void startActivityByName(String label) {
+        startActivity(getConfig().getActivityByName(label).getId());
     }
 }
