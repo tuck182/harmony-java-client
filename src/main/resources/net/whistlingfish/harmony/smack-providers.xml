@@ -1,0 +1,8 @@
+ <?xml version="1.0"?>
+<smackProviders>
+  <iqProvider>
+    <elementName>oa</elementName>
+    <namespace>connect.logitech.com</namespace>
+    <className>net.whistlingfish.harmony.protocol.OAReplyProvider</className>
+  </iqProvider>
+</smackProviders>
