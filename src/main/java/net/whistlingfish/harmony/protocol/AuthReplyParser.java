@@ -5,15 +5,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.lang.String.format;
+import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
 public class AuthReplyParser extends OAReplyParser {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper() //
-            .disable(FAIL_ON_UNKNOWN_PROPERTIES);
-
     /*
      * FIXME: This parser could be far cleaner than it is, given the possibility of the pseudo-json components
      * containing colons, and the structure of them

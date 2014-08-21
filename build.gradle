@@ -33,6 +33,10 @@ dependencies {
     // HTTP/REST
     compile 'us.monoid.web:resty:0.3.2'
 
+    // Shell
+    compile 'args4j:args4j:2.0.29'
+    compile 'com.martiansoftware:jsap:2.1'
+
     testCompile 'junit:junit:4.+'
 }
 

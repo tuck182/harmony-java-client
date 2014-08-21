@@ -1,20 +1,23 @@
 package net.whistlingfish.harmony;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.inject.Inject;
+
+import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 
 import org.jivesoftware.smack.provider.ProviderFileLoader;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.FileUtils;
+import org.kohsuke.args4j.CmdLineParser;
 
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-
-import static java.lang.String.format;
-import static java.lang.System.out;
+import com.martiansoftware.jsap.CommandLineTokenizer;
 
 public class Main {
     @Inject
@@ -29,17 +32,29 @@ public class Main {
 
     public int execute(String[] args) throws Exception {
         harmonyClient.connect(args[0], args[1], args[2]);
-        println(harmonyClient.getConfig());
-        try {
-            Thread.sleep(5_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return 0;
-    }
 
-    private void println(String fmt, Object... args) {
-        out.println(format(fmt, args));
+        final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        String line;
+        while (true) {
+            line = br.readLine();
+            if (line == null || line.equals("q"))
+                break;
+
+            try {
+                String[] lineArgs = CommandLineTokenizer.tokenize(line);
+                ShellCommandWrapper command = new ShellCommandWrapper();
+                new CmdLineParser(command).parseArgument(lineArgs);
+                command.execute(harmonyClient);
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+                System.err.println("\n");
+            }
+        }
+
+        br.close();
+
+        return 0;
     }
 
     public static class MainModule implements Module {

@@ -20,8 +20,8 @@ public abstract class OA extends IQ {
 
     @Override
     public CharSequence getChildElementXML() {
-        return format("\n<oa xmlns=\"connect.logitech.com\" mime=\"%s\">\n"
-                + "    %s\n" //
+        return format("\n<oa xmlns=\"connect.logitech.com\" mime=\"%s\">"
+                + "%s" //
                 + "</oa>\n", //
                 getMimeType(),
                 joinChildElementPairs(getChildElementPairs()));

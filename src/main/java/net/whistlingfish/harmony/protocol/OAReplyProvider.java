@@ -14,6 +14,7 @@ public class OAReplyProvider implements IQProvider {
     static {
         replyParsers.put(AuthReply.MIME_TYPE, new AuthReplyParser());
         replyParsers.put(GetConfigReply.MIME_TYPE, new GetConfigReplyParser());
+        replyParsers.put(PressButtonReplyParser.MIME_TYPE, new PressButtonReplyParser());
     }
 
     @Override
@@ -28,6 +29,10 @@ public class OAReplyProvider implements IQProvider {
             } else {
                 attrs.put(parser.getAttributeName(i), parser.getAttributeValue(i));
             }
+        }
+        if (!"200".equals(attrs.get("errorcode"))) {
+            throw new HarmonyProtocolException(format("Got error response [%s]: %s", attrs.get("errorcode"),
+                    attrs.get("errorstring")));
         }
 
         String mimeType = parser.getAttributeValue(null, "mime");
