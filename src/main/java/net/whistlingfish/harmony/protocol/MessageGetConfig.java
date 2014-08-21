@@ -6,7 +6,7 @@ import org.jivesoftware.smack.packet.IQ;
 
 import static java.util.Collections.emptyMap;
 
-public class GetConfig {
+public class MessageGetConfig {
     public static final String MIME_TYPE = "vnd.logitech.harmony/vnd.logitech.harmony.engine?config";
 
     /*

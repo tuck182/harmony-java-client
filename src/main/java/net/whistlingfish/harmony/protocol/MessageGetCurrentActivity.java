@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableMap;
 import static java.util.Collections.emptyMap;
 import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
-public class GetCurrentActivity {
+public class MessageGetCurrentActivity {
     public static final String MIME_TYPE = "vnd.logitech.harmony/vnd.logitech.harmony.engine?getCurrentActivity";
 
     /*

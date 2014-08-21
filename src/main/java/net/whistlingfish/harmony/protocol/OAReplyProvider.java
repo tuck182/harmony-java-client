@@ -3,9 +3,10 @@ package net.whistlingfish.harmony.protocol;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.whistlingfish.harmony.protocol.GetConfig.GetConfigReplyParser;
-import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityReplyParser;
-import net.whistlingfish.harmony.protocol.HoldAction.HoldActionReplyParser;
+import net.whistlingfish.harmony.protocol.MessageAuth.AuthReplyParser;
+import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReplyParser;
+import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityReplyParser;
+import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionReplyParser;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
@@ -16,10 +17,10 @@ import static java.lang.String.format;
 public class OAReplyProvider implements IQProvider {
     private static Map<String, OAReplyParser> replyParsers = new HashMap<>();
     static {
-        replyParsers.put(AuthReply.MIME_TYPE, new AuthReplyParser());
-        replyParsers.put(GetConfig.MIME_TYPE, new GetConfigReplyParser());
-        replyParsers.put(HoldAction.MIME_TYPE, new HoldActionReplyParser());
-        replyParsers.put(GetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
+        replyParsers.put(MessageAuth.MIME_TYPE, new AuthReplyParser());
+        replyParsers.put(MessageGetConfig.MIME_TYPE, new GetConfigReplyParser());
+        replyParsers.put(MessageHoldAction.MIME_TYPE, new HoldActionReplyParser());
+        replyParsers.put(MessageGetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
     }
 
     @Override

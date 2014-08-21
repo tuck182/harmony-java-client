@@ -7,20 +7,20 @@ import javax.inject.Inject;
 
 import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.config.HarmonyConfig;
-import net.whistlingfish.harmony.protocol.AuthReply;
-import net.whistlingfish.harmony.protocol.AuthRequest;
+import net.whistlingfish.harmony.protocol.MessageAuth.AuthReply;
+import net.whistlingfish.harmony.protocol.MessageAuth.AuthRequest;
 import net.whistlingfish.harmony.protocol.AuthService;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
-import net.whistlingfish.harmony.protocol.GetConfig.GetConfigReply;
-import net.whistlingfish.harmony.protocol.GetConfig.GetConfigRequest;
-import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityReply;
-import net.whistlingfish.harmony.protocol.GetCurrentActivity.GetCurrentActivityRequest;
-import net.whistlingfish.harmony.protocol.HoldAction.HoldActionRequest;
+import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReply;
+import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigRequest;
+import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityReply;
+import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityRequest;
+import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionRequest;
 import net.whistlingfish.harmony.protocol.LoginToken;
 import net.whistlingfish.harmony.protocol.OA;
 import net.whistlingfish.harmony.protocol.OAReplyFilter;
-import net.whistlingfish.harmony.protocol.StartActivity.StartActivityReply;
-import net.whistlingfish.harmony.protocol.StartActivity.StartActivityRequest;
+import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReply;
+import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityRequest;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
@@ -37,8 +37,8 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static net.whistlingfish.harmony.protocol.HoldAction.HoldStatus.PRESS;
-import static net.whistlingfish.harmony.protocol.HoldAction.HoldStatus.RELEASE;
+import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.PRESS;
+import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.RELEASE;
 
 public class HarmonyClient {
     private static Logger logger = LoggerFactory.getLogger(HarmonyClient.class);

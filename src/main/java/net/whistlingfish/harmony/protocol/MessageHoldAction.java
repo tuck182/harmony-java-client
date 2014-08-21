@@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableMap;
 
 import static java.util.Collections.emptyMap;
 
-public class HoldAction {
+public class MessageHoldAction {
     public static final String MIME_TYPE = "vnd.logitech.harmony/vnd.logitech.harmony.engine?holdAction";
 
     /*
