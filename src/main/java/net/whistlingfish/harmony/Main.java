@@ -6,9 +6,7 @@ import java.io.InputStreamReader;
 
 import javax.inject.Inject;
 
-import net.whistlingfish.harmony.shell.ListActivitiesCommand;
 import net.whistlingfish.harmony.shell.ShellCommandWrapper;
-import net.whistlingfish.harmony.shell.ShowActivityCommand;
 
 import org.jivesoftware.smack.provider.ProviderFileLoader;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -36,9 +34,6 @@ public class Main {
         harmonyClient.connect(args[0], args[1], args[2]);
 
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        new ListActivitiesCommand().execute(harmonyClient);
-        new ShowActivityCommand().execute(harmonyClient);
 
         String line;
         while (true) {
