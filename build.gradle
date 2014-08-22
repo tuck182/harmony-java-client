@@ -1,8 +1,11 @@
 apply plugin: 'java'
+apply plugin: 'maven'
 apply plugin: 'eclipse'
 
+group = 'net.whistlingfish'
+version = '1.0-SNAPSHOT'
+
 sourceCompatibility = 1.7
-version = '1.0'
 jar {
     manifest {
         attributes 'Implementation-Title': 'Java Harmony Hub Client', 'Implementation-Version': version
