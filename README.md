@@ -19,3 +19,10 @@ commands are:
   * start <activity>        - starts an activity (takes a string or id)
   * press <device> <button> - perform a single button press
   * get_config              - Dumps the full config json, unformatted 
+
+Example
+-------
+
+Run `gradle jar` to build a jar file with dependent librariers in lib. Navigate to lib and run:
+
+`java -classpath harmony-java-client-1.0.jar:lib/* net.whistlingfish.harmony.Main HARMONY_HOST LOGITECH_USERNAME LOGITECH_PASSWORD`
