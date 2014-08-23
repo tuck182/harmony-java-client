@@ -8,13 +8,6 @@ version = '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.7
 
-task copyToLib( type: Copy ) {
-    into "$buildDir/libs/lib"
-    from configurations.runtime
-}
-
-jar { dependsOn copyToLib }
-
 repositories {
     mavenCentral()
 }
@@ -68,20 +61,53 @@ test {
     systemProperties 'property': 'value'
 }
 
+ext.sharedManifest = manifest {
+    attributes(
+        'Implementation-Title': 'Java Harmony Hub Client',
+        'Implementation-Version': version,
+        'Main-Class': 'net.whistlingfish.harmony.Main'
+    )
+}
+
 jar {
+    manifest = osgiManifest {
+        from project.sharedManifest
+        
+        classesDir = sourceSets.main.output.classesDir
+        classpath = sourceSets.main.runtimeClasspath
+
+        instruction 'Private-Package', 'net.whistlingfish.harmony.*'
+        instruction 'Import-Package', 'sun.misc;resolution:=optional,*'
+        instruction 'Export-Package', 'net.whistlingfish.harmony;version=1.0.0,net.whistlingfish.harmony.config;version=1.0.0'
+    }
+}
+
+task allJar(type: Jar) {
+    baseName = "$project.name-all"
+    from sourceSets.main.output
+    from { (configurations.runtime + configurations.provided).collect { it.isDirectory() ? it : zipTree(it) } }
+    manifest {
+        from project.sharedManifest
+    }
+}
+
+task openhabJar(type: Jar) {
+    baseName = "$project.name-openhab"
+    
+    from sourceSets.main.output
     from { configurations.compile }
     manifest = osgiManifest {
         classesDir = sourceSets.main.output.classesDir
         classpath = sourceSets.main.runtimeClasspath
         
-        instruction 'Implementation-Title', 'Java Harmony Hub Client'
-        instruction 'Implementation-Version', version
         instruction 'Private-Package', 'net.whistlingfish.harmony.*'
         instruction 'Import-Package', 'net.whistlingfish.harmony.*;version="[1.0,1.1)",org.slf4j.*;version="[1.7,1.8)",sun.misc;resolution:=optional'
         instruction 'Export-Package', 'net.whistlingfish.harmony;version=1.0.0,net.whistlingfish.harmony.config;version=1.0.0'
         instruction 'Bundle-ClassPath', project.configurations.compile.files.collect { it.name }.join(',')+",."
     }
 }
+
+assemble { dependsOn allJar, openhabJar }
 
 uploadArchives {
     repositories {
