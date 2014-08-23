@@ -2,6 +2,10 @@ package net.whistlingfish.harmony;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,6 +21,8 @@ import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigRequest;
 import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityReply;
 import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityRequest;
 import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionRequest;
+import net.whistlingfish.harmony.protocol.MessagePing.PingReply;
+import net.whistlingfish.harmony.protocol.MessagePing.PingRequest;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReply;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityRequest;
 import net.whistlingfish.harmony.protocol.OAPacket;
@@ -37,22 +43,37 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.PRESS;
 import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.RELEASE;
 
 public class HarmonyClient {
     private static Logger logger = LoggerFactory.getLogger(HarmonyClient.class);
 
+
     private static final int DEFAULT_PORT = 5222;
     private static final String DEFAULT_XMPP_USER = "guest@connect.logitech.com/gatorade.";
     private static final String DEFAULT_XMPP_PASSWORD = "gatorade.";
 
     private XMPPTCPConnection connection;
+    private ScheduledExecutorService scheduler;
+    private ScheduledFuture<?> heartbeat;
 
     @Inject
     private AuthService authService;
 
     private HarmonyConfig config;
+
+    public HarmonyClient() {
+        scheduler = Executors.newScheduledThreadPool(1);
+    }
+
+    public static HarmonyClient getInstance() {
+        Injector injector = Guice.createInjector(new HarmonyClientModule());
+        return injector.getInstance(HarmonyClient.class);
+    }
 
     /*
      * FIXME: Wrap Smack exceptions
@@ -80,6 +101,23 @@ public class HarmonyClient {
             connection.connect();
             connection.login(oaResponse.getUsername(), oaResponse.getPassword(), "main");
             connection.setFromMode(FromMode.USER);
+
+            heartbeat = scheduler.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (!connection.isConnected()) {
+                            if (heartbeat != null) {
+                                heartbeat.cancel(false);
+                            }
+                            return;
+                        }
+                        sendPing();
+                    } catch (Exception e) {
+                        logger.warn("Send heartbeat failed", e);
+                    }
+                }
+            }, 30, 30, TimeUnit.SECONDS);
 
         } catch (XMPPException | SmackException | IOException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
@@ -164,6 +202,10 @@ public class HarmonyClient {
         return new AuthRequest(loginToken);
     }
 
+    public void sendPing() {
+        sendOAPacket(connection, new PingRequest(), PingReply.class);
+    }
+
     public void pressButton(String deviceId, String button) {
         sendOAPacket(connection, new HoldActionRequest(deviceId, button, PRESS));
         try {
@@ -179,7 +221,8 @@ public class HarmonyClient {
     }
 
     public Activity getCurrentActivity() {
-        GetCurrentActivityReply reply = sendOAPacket(connection, new GetCurrentActivityRequest(), GetCurrentActivityReply.class);
+        GetCurrentActivityReply reply = sendOAPacket(connection, new GetCurrentActivityRequest(),
+                GetCurrentActivityReply.class);
         HarmonyConfig config = getConfig();
         return config.getActivityById(reply.getResult());
     }

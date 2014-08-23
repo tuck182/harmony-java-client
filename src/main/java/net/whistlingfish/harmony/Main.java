@@ -1,22 +1,16 @@
 package net.whistlingfish.harmony;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import javax.inject.Inject;
 
 import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 
-import org.jivesoftware.smack.provider.ProviderFileLoader;
-import org.jivesoftware.smack.provider.ProviderManager;
-import org.jivesoftware.smack.util.FileUtils;
 import org.kohsuke.args4j.CmdLineParser;
 
-import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.martiansoftware.jsap.CommandLineTokenizer;
 
 public class Main {
@@ -24,7 +18,7 @@ public class Main {
     private HarmonyClient harmonyClient;
 
     public static void main(String[] args) throws Exception {
-        Injector injector = Guice.createInjector(new MainModule());
+        Injector injector = Guice.createInjector(new HarmonyClientModule());
         Main mainObject = new Main();
         injector.injectMembers(mainObject);
         System.exit(mainObject.execute(args));
@@ -55,17 +49,5 @@ public class Main {
         br.close();
 
         return 0;
-    }
-
-    public static class MainModule implements Module {
-        @Override
-        public void configure(Binder binder) {
-            try {
-                ProviderManager.addLoader(new ProviderFileLoader(FileUtils.getStreamForUrl(
-                        "classpath:net/whistlingfish/harmony/smack-providers.xml", null)));
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to initialize smack providers", e);
-            }
-        }
     }
 }

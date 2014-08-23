@@ -1,16 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
+apply plugin: 'osgi'
 
 group = 'net.whistlingfish'
 version = '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.7
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'Java Harmony Hub Client', 'Implementation-Version': version
-    }
-}
 
 task copyToLib( type: Copy ) {
     into "$buildDir/libs/lib"
@@ -23,12 +19,30 @@ repositories {
     mavenCentral()
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+}
+
+eclipse {
+    classpath { plusConfigurations += configurations.provided }
+}
+
 dependencies {
     // basic libraries
-    compile 'org.slf4j:slf4j-api:1.7.7'
-    compile 'ch.qos.logback:logback-core:1.1.2'
-    compile 'ch.qos.logback:logback-classic:1.1.2'
-    compile 'com.google.guava:guava:17.+'
+    provided 'org.slf4j:slf4j-api:1.7.7'
+    provided 'ch.qos.logback:logback-core:1.1.2'
+    provided 'ch.qos.logback:logback-classic:1.1.2'
+    compile 'com.google.guava:guava:17.0'
     compile 'com.fasterxml.jackson.core:jackson-core:2.4.2'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
     
@@ -54,10 +68,29 @@ test {
     systemProperties 'property': 'value'
 }
 
+jar {
+    from { configurations.compile }
+    manifest = osgiManifest {
+        classesDir = sourceSets.main.output.classesDir
+        classpath = sourceSets.main.runtimeClasspath
+        
+        instruction 'Implementation-Title', 'Java Harmony Hub Client'
+        instruction 'Implementation-Version', version
+        instruction 'Private-Package', 'net.whistlingfish.harmony.*'
+        instruction 'Import-Package', 'net.whistlingfish.harmony.*;version="[1.0,1.1)",org.slf4j.*;version="[1.7,1.8)",sun.misc;resolution:=optional'
+        instruction 'Export-Package', 'net.whistlingfish.harmony;version=1.0.0,net.whistlingfish.harmony.config;version=1.0.0'
+        instruction 'Bundle-ClassPath', project.configurations.compile.files.collect { it.name }.join(',')+",."
+    }
+}
+
 uploadArchives {
     repositories {
        flatDir {
            dirs 'repos'
        }
     }
+}
+
+task echoEclipseSourceSets() << {
+    eclipse.classpath.sourceSets.each { println it }
 }

@@ -9,6 +9,7 @@ import net.whistlingfish.harmony.protocol.MessageAuth.AuthReplyParser;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReplyParser;
 import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentActivityReplyParser;
 import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionReplyParser;
+import net.whistlingfish.harmony.protocol.MessagePing.PingReplyParser;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReplyParser;
 
 import org.jivesoftware.smack.packet.IQ;
@@ -25,6 +26,7 @@ public class OAReplyProvider implements IQProvider {
         replyParsers.put(MessageHoldAction.MIME_TYPE, new HoldActionReplyParser());
         replyParsers.put(MessageGetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
         replyParsers.put(MessageStartActivity.MIME_TYPE, new StartActivityReplyParser());
+        replyParsers.put(MessagePing.MIME_TYPE, new PingReplyParser());
     }
 
     private static Set<String> validResponses = new HashSet<>();
