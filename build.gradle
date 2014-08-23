@@ -9,6 +9,13 @@ jar {
     }
 }
 
+task copyToLib( type: Copy ) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
+
+jar { dependsOn copyToLib }
+
 repositories {
     mavenCentral()
 }
