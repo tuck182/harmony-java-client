@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class Device {
-    private String id;
+    private int id;
 
     private String label;
 
@@ -45,11 +45,11 @@ public class Device {
     @JsonProperty("isManualPower")
     private boolean manualPower;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

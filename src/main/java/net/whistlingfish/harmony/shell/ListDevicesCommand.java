@@ -7,8 +7,8 @@ import net.whistlingfish.harmony.HarmonyClient;
 public class ListDevicesCommand extends ShellCommand {
     @Override
     public void execute(HarmonyClient harmonyClient) {
-        for (Entry<String, String> e : harmonyClient.getDeviceLabels().entrySet()) {
-            println("%s: %s", e.getKey(), e.getValue());
+        for (Entry<Integer, String> e : harmonyClient.getDeviceLabels().entrySet()) {
+            println("%d: %s", e.getKey(), e.getValue());
         }
     }
 }

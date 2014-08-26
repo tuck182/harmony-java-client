@@ -41,8 +41,8 @@ public class HarmonyConfig {
         }
     }
 
-    public Map<String, String> getDeviceLabels() {
-        Map<String, String> results = new HashMap<>();
+    public Map<Integer, String> getDeviceLabels() {
+        Map<Integer, String> results = new HashMap<>();
         for (Device device : devices) {
             results.put(device.getId(), device.getLabel());
         }
@@ -93,6 +93,14 @@ public class HarmonyConfig {
         for (Activity activity : activities) {
             if (activity.getLabel().equals(label))
                 return activity;
+        }
+        return null;
+    }
+
+    public Device getDeviceByName(String label) {
+        for (Device device : devices) {
+            if (device.getLabel().equals(label))
+                return device;
         }
         return null;
     }

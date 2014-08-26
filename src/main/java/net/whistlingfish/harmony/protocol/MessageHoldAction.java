@@ -18,11 +18,11 @@ public class MessageHoldAction {
      * Request
      */
     public static class HoldActionRequest extends IrCommand {
+        private int deviceId;
         private String button;
-        private String deviceId;
         private HoldStatus status;
 
-        public HoldActionRequest(String deviceId, String button, HoldStatus status) {
+        public HoldActionRequest(int deviceId, String button, HoldStatus status) {
             super(MIME_TYPE);
             this.deviceId = deviceId;
             this.button = button;

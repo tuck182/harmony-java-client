@@ -13,7 +13,10 @@ public class PressButtonCommand extends ShellCommand {
 
     @Override
     public void execute(HarmonyClient harmonyClient) {
-        harmonyClient.pressButton(deviceId, button);
+        try {
+            harmonyClient.pressButton(Integer.parseInt(deviceId), button);
+        } catch (NumberFormatException e) {
+            harmonyClient.pressButton(deviceId, button);
+        }
     }
-
 }

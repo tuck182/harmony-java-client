@@ -10,11 +10,11 @@ public abstract class IrCommand extends OAPacket {
         super(mimeType);
     }
 
-    public String generateAction(String deviceId, String button) {
+    public String generateAction(int deviceId, String button) {
         try {
             return OBJECT_MAPPER.writeValueAsString(ImmutableMap.<String, Object> builder() //
                     .put("type", "IRCommand")
-                    .put("deviceId", deviceId)
+                    .put("deviceId", Integer.valueOf(deviceId).toString())
                     .put("command", button)
                     .build()).replaceAll(":", "::");
         } catch (JsonProcessingException e) {

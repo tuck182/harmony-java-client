@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.config.Device;
 import net.whistlingfish.harmony.config.HarmonyConfig;
 import net.whistlingfish.harmony.protocol.AuthService;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
@@ -276,7 +277,7 @@ public class HarmonyClient {
         sendOAPacket(connection, new PingRequest(), PingReply.class);
     }
 
-    public void pressButton(String deviceId, String button) {
+    public void pressButton(int deviceId, String button) {
         sendOAPacket(connection, new HoldActionRequest(deviceId, button, PRESS));
         try {
             Thread.sleep(200);
@@ -286,7 +287,15 @@ public class HarmonyClient {
         sendOAPacket(connection, new HoldActionRequest(deviceId, button, RELEASE));
     }
 
-    public Map<String, String> getDeviceLabels() {
+    public void pressButton(String deviceName, String button) {
+        Device device = getConfig().getDeviceByName(deviceName);
+        if (device == null) {
+            throw new IllegalArgumentException(format("Unknown device '%s'", deviceName));
+        }
+        pressButton(device.getId(), button);
+    }
+
+    public Map<Integer, String> getDeviceLabels() {
         return getConfig().getDeviceLabels();
     }
 
