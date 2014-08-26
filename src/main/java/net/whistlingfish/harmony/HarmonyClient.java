@@ -30,13 +30,14 @@ import net.whistlingfish.harmony.protocol.OAReplyFilter;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
-import org.jivesoftware.smack.PacketInterceptor;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPConnection.FromMode;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
@@ -46,12 +47,15 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import static java.lang.String.format;
 import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.PRESS;
 import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.RELEASE;
 
 public class HarmonyClient {
-    private static Logger logger = LoggerFactory.getLogger(HarmonyClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(HarmonyClient.class);
 
+    public static final int DEFAULT_REPLY_TIMEOUT = 5_000;
+    public static final int START_ACTIVITY_REPLY_TIMEOUT = 30_000;
 
     private static final int DEFAULT_PORT = 5222;
     private static final String DEFAULT_XMPP_USER = "guest@connect.logitech.com/gatorade.";
@@ -125,12 +129,16 @@ public class HarmonyClient {
     }
 
     private Packet sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet) {
+        return sendOAPacket(authConnection, packet, DEFAULT_REPLY_TIMEOUT);
+    }
+
+    private Packet sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet, long replyTimeout) {
         PacketCollector collector = authConnection.createPacketCollector(new EmptyIncrementedIdReplyFilter(packet,
                 authConnection));
         try {
             authConnection.sendPacket(packet);
-            return getNextPacketSkipContinues(collector);
-        } catch (/* XMPPException | */SmackException e) {
+            return getNextPacketSkipContinues(collector, replyTimeout);
+        } catch (SmackException | XMPPErrorException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
         } finally {
             collector.cancel();
@@ -138,27 +146,33 @@ public class HarmonyClient {
     }
 
     private <R extends OAPacket> R sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet, Class<R> replyClass) {
+        return sendOAPacket(authConnection, packet, replyClass, DEFAULT_REPLY_TIMEOUT);
+    }
+
+    private <R extends OAPacket> R sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet, Class<R> replyClass,
+            long replyTimeout) {
         PacketCollector collector = authConnection.createPacketCollector(new OAReplyFilter(packet, authConnection));
         try {
             authConnection.sendPacket(packet);
-            return replyClass.cast(getNextPacketSkipContinues(collector));
-        } catch (SmackException e) {
+            return replyClass.cast(getNextPacketSkipContinues(collector, replyTimeout));
+        } catch (SmackException | XMPPErrorException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
         } finally {
             collector.cancel();
         }
     }
 
-    private Packet getNextPacketSkipContinues(PacketCollector collector) {
+    private Packet getNextPacketSkipContinues(PacketCollector collector, long replyTimeout)
+            throws NoResponseException, XMPPErrorException {
         while (true) {
-            // Packet reply = collector.nextResultOrThrow();
-            Packet reply = collector.nextResultBlockForever();
-            if (!(reply instanceof OAPacket)) {
+            Packet reply = collector.nextResult(replyTimeout);
+            if (reply == null) {
+                throw new NoResponseException();
+            }
+            if (reply instanceof OAPacket && ((OAPacket) reply).isContinuePacket()) {
                 continue;
             }
-            OAPacket oaReply = (OAPacket) reply;
-            if (!oaReply.isContinuePacket())
-                return reply;
+            return reply;
         }
     }
 
@@ -169,9 +183,9 @@ public class HarmonyClient {
                 return true;
             }
         };
-        authConnection.addPacketInterceptor(new PacketInterceptor() {
+        authConnection.addPacketSendingListener(new PacketListener() {
             @Override
-            public void interceptPacket(Packet packet) {
+            public void processPacket(Packet packet) {
                 logger.trace("{}>>> {}", prefix, packet.toXML().toString().replaceAll("\n", ""));
             }
         }, allPacketsFilter);
@@ -228,7 +242,11 @@ public class HarmonyClient {
     }
 
     public void startActivity(int activityId) {
-        sendOAPacket(connection, new StartActivityRequest(activityId), StartActivityReply.class);
+        if (getConfig().getActivityById(activityId) == null) {
+            throw new IllegalArgumentException(format("Unknown activity '%d'", activityId));
+        }
+        sendOAPacket(connection, new StartActivityRequest(activityId), StartActivityReply.class,
+                START_ACTIVITY_REPLY_TIMEOUT);
     }
 
     public void startActivityByName(String label) {
