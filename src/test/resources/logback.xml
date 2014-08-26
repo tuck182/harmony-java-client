@@ -1,14 +1,33 @@
 <configuration>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <!-- encoders are assigned the type
-         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
       <pattern>%msg%n</pattern>
     </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>TRACE</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>NEUTRAL</onMismatch>
+    </filter>
   </appender>
 
+  <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%msg%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>TRACE</level>
+      <onMatch>NEUTRAL</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
+  <logger name="net.whistlingfish.harmony.HarmonyClient" level="DEBUG"/>
+  <logger name="net.whistlingfish.harmony.protocol" level="DEBUG"/>
+  
   <root level="debug">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="STDERR" />
   </root>
 </configuration>

@@ -172,13 +172,13 @@ public class HarmonyClient {
         authConnection.addPacketInterceptor(new PacketInterceptor() {
             @Override
             public void interceptPacket(Packet packet) {
-                logger.trace("{}>>> {}", prefix, packet);
+                logger.trace("{}>>> {}", prefix, packet.toXML().toString().replaceAll("\n", ""));
             }
         }, allPacketsFilter);
         authConnection.addPacketListener(new PacketListener() {
             @Override
             public void processPacket(Packet packet) throws NotConnectedException {
-                logger.trace("<<<{} {}", prefix, packet);
+                logger.trace("<<<{} {}", prefix, packet.toXML().toString().replaceAll("\n", ""));
             }
         }, allPacketsFilter);
     }
