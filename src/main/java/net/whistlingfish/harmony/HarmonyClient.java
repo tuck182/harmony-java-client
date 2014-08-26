@@ -315,6 +315,10 @@ public class HarmonyClient {
     }
 
     public void startActivityByName(String label) {
-        startActivity(getConfig().getActivityByName(label).getId());
+        Activity activity = getConfig().getActivityByName(label);
+        if (activity == null) {
+            throw new IllegalArgumentException(format("Unknown activity '%s'", label));
+        }
+        startActivity(activity.getId());
     }
 }
