@@ -1,7 +1,9 @@
 package net.whistlingfish.harmony;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -40,6 +42,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +65,7 @@ public class HarmonyClient {
     private static final String DEFAULT_XMPP_PASSWORD = "gatorade.";
 
     private XMPPTCPConnection connection;
-    private ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> heartbeat;
 
     @Inject
@@ -70,9 +73,10 @@ public class HarmonyClient {
 
     private HarmonyConfig config;
 
-    public HarmonyClient() {
-        scheduler = Executors.newScheduledThreadPool(1);
-    }
+    private Activity currentActivity;
+
+
+    private Set<ActivityChangeListener> activityChangeListeners = new HashSet<>();
 
     public static HarmonyClient getInstance() {
         Injector injector = Guice.createInjector(new HarmonyClientModule());
@@ -123,9 +127,61 @@ public class HarmonyClient {
                 }
             }, 30, 30, TimeUnit.SECONDS);
 
+            monitorActivityChanges();
+            getCurrentActivity();
+
         } catch (XMPPException | SmackException | IOException e) {
             throw new RuntimeException("Failed communicating with Harmony Hub", e);
         }
+    }
+
+    private void monitorActivityChanges() {
+        connection.addPacketListener(new PacketListener() {
+            @Override
+            public void processPacket(Packet packet) throws NotConnectedException {
+                updateCurrentActivity(getCurrentActivity());
+            }
+        }, new PacketFilter() {
+            @Override
+            public boolean accept(Packet packet) {
+                PacketExtension event = packet.getExtension("event", "connect.logitech.com");
+                if (event == null)
+                    return false;
+                return true;
+            }
+        });
+    }
+
+    private synchronized Activity updateCurrentActivity(Activity activity) {
+        if (currentActivity != activity) {
+            currentActivity = activity;
+            for (ActivityChangeListener listener : activityChangeListeners) {
+            	logger.debug("listener[{}] notified: {}", listener, currentActivity);
+                listener.activityStarted(currentActivity);
+            }
+        }
+        return currentActivity;
+    }
+
+    public void addListener(HarmonyHubListener listener) {
+        listener.addTo(this);
+    }
+
+    public synchronized void addListener(ActivityChangeListener listener) {
+    	logger.debug("listener[{}] added", listener);
+        activityChangeListeners.add(listener);
+        if (currentActivity != null) {
+        	logger.debug("listener[{}] notified: {}", listener, currentActivity);
+            listener.activityStarted(currentActivity);
+        }
+    }
+
+    public void removeListener(HarmonyHubListener listener) {
+        listener.removeFrom(this);
+    }
+
+    public void removeListener(ActivityChangeListener activityChangeListener) {
+        activityChangeListeners.remove(activityChangeListener);
     }
 
     private Packet sendOAPacket(XMPPTCPConnection authConnection, OAPacket packet) {
@@ -238,7 +294,7 @@ public class HarmonyClient {
         GetCurrentActivityReply reply = sendOAPacket(connection, new GetCurrentActivityRequest(),
                 GetCurrentActivityReply.class);
         HarmonyConfig config = getConfig();
-        return config.getActivityById(reply.getResult());
+        return updateCurrentActivity(config.getActivityById(reply.getResult()));
     }
 
     public void startActivity(int activityId) {

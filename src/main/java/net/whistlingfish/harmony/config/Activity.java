@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static java.lang.String.format;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
@@ -109,4 +111,9 @@ public class Activity {
     public void setBaseImageUri(String baseImageUri) {
         this.baseImageUri = baseImageUri;
     }
+
+	@Override
+	public String toString() {
+		return format("Activity[%d]:%s", getId(), getLabel());
+	}
 }

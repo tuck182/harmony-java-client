@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 
 import javax.inject.Inject;
 
+import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 
 import org.kohsuke.args4j.CmdLineParser;
@@ -12,6 +13,8 @@ import org.kohsuke.args4j.CmdLineParser;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.martiansoftware.jsap.CommandLineTokenizer;
+
+import static java.lang.String.format;
 
 public class Main {
     @Inject
@@ -25,6 +28,12 @@ public class Main {
     }
 
     public int execute(String[] args) throws Exception {
+        harmonyClient.addListener(new ActivityChangeListener() {
+            @Override
+            public void activityStarted(Activity activity) {
+                System.out.println(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
+            }
+        });
         harmonyClient.connect(args[0], args[1], args[2]);
 
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
