@@ -26,7 +26,7 @@ public class MessageStartActivity {
         protected Map<String, Object> getChildElementPairs() {
             return ImmutableMap.<String, Object> builder() //
                     .put("activityId", activityId)
-                    .put("timestamp", System.currentTimeMillis())
+                    .put("timestamp", generateTimestamp())
                     .build();
         }
     }

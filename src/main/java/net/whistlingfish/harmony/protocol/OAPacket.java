@@ -10,6 +10,8 @@ import org.jivesoftware.smack.packet.IQ;
 import com.google.common.base.Joiner;
 
 public abstract class OAPacket extends IQ {
+    private static final long CREATION_TIME = System.currentTimeMillis();
+
     private final String mimeType;
     private String statusCode;
     private String errorString;
@@ -64,5 +66,9 @@ public abstract class OAPacket extends IQ {
 
     public boolean isContinuePacket() {
         return "100".equals(statusCode);
+    }
+
+    protected long generateTimestamp() {
+        return System.currentTimeMillis() - CREATION_TIME;
     }
 }

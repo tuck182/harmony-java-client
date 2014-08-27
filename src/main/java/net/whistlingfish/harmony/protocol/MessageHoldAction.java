@@ -34,6 +34,7 @@ public class MessageHoldAction {
             return ImmutableMap.<String, Object> builder() //
                     .put("action", generateAction(deviceId, button))
                     .put("status", status)
+                    .put("timestamp", generateTimestamp())
                     .build();
         }
     }
