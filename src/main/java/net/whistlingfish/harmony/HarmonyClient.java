@@ -84,9 +84,6 @@ public class HarmonyClient {
         return injector.getInstance(HarmonyClient.class);
     }
 
-    /*
-     * FIXME: Wrap Smack exceptions
-     */
     public void connect(String host, String username, String password) {
         // First get a login token from Logitech
         LoginToken loginToken = authService.getLoginToken(username, password);
