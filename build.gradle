@@ -23,14 +23,6 @@ configurations {
     provided
 }
 
-sourceSets {
-    main { compileClasspath += configurations.provided }
-}
-
-eclipse {
-    classpath { plusConfigurations += configurations.provided }
-}
-
 dependencies {
     // basic libraries
     provided 'org.slf4j:slf4j-api:1.7.7'
@@ -56,6 +48,14 @@ dependencies {
     compile 'com.martiansoftware:jsap:2.1'
 
     testCompile 'junit:junit:4.+'
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+}
+
+eclipse {
+    classpath { plusConfigurations += configurations.provided }
 }
 
 test {
