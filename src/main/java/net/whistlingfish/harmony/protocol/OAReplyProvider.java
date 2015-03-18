@@ -26,14 +26,15 @@ public class OAReplyProvider implements IQProvider {
         replyParsers.put(MessageHoldAction.MIME_TYPE, new HoldActionReplyParser());
         replyParsers.put(MessageGetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
         replyParsers.put(MessageStartActivity.MIME_TYPE, new StartActivityReplyParser());
+        replyParsers.put(MessageStartActivity.MIME_TYPE2, new StartActivityReplyParser());
         replyParsers.put(MessagePing.MIME_TYPE, new PingReplyParser());
     }
 
-    private static Set<String> validResponses = new HashSet<>();
-    static {
-        validResponses.add("100");
-        validResponses.add("200");
-    }
+//    private static Set<String> validResponses = new HashSet<>();
+//    static {
+//        validResponses.add("100");
+//        validResponses.add("200");
+//    }
 
     @Override
     public IQ parseIQ(XmlPullParser parser) throws Exception {
@@ -50,15 +51,15 @@ public class OAReplyProvider implements IQProvider {
         }
         String statusCode = attrs.get("errorcode");
         String errorString = attrs.get("errorstring");
-        if (!validResponses.contains(statusCode)) {
-            throw new HarmonyProtocolException(format("Got error response [%s]: %s", statusCode,
-                    attrs.get("errorstring")));
-        }
 
         String mimeType = parser.getAttributeValue(null, "mime");
         OAReplyParser replyParser = replyParsers.get(mimeType);
         if (replyParser == null) {
             throw new HarmonyProtocolException(format("Unable to handle reply type '%s'", mimeType));
+        }
+        if (!replyParser.validResponseCode(statusCode)) {
+            throw new HarmonyProtocolException(format("Got error response [%s]: %s", statusCode,
+                    attrs.get("errorstring")));
         }
 
         StringBuilder contents = new StringBuilder();
