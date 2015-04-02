@@ -101,6 +101,9 @@ public class HarmonyClient {
 				logger.debug("Connection is already closed.");
 			}
     	}
+    	if (heartbeat != null) {
+            heartbeat.cancel(false);
+        }
     }
     
     public void connect(String host, String username, String password) {
@@ -163,13 +166,9 @@ public class HarmonyClient {
                 @Override
                 public void run() {
                     try {
-                        if (!connection.isConnected()) {
-                            if (heartbeat != null) {
-                                heartbeat.cancel(false);
-                            }
-                            return;
-                        }
-                        sendPing();
+                    	if(connection.isConnected()){
+                    		sendPing();
+                    	}
                     } catch (Exception e) {
                         logger.warn("Send heartbeat failed", e);
                     }
