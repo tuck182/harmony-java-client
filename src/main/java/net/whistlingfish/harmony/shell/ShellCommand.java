@@ -9,6 +9,10 @@ public abstract class ShellCommand {
     public abstract void execute(HarmonyClient harmonyClient);
 
     protected void println(String fmt, Object... args) {
-        out.println(format(fmt, args));
+    	if(args.length == 0){
+    		out.println(fmt);
+    	}else{
+    		out.println(format(fmt, args));
+    	}
     }
 }

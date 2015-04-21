@@ -33,10 +33,12 @@ import net.whistlingfish.harmony.protocol.OAPacket;
 import net.whistlingfish.harmony.protocol.OAReplyFilter;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPConnection.FromMode;
@@ -59,7 +61,7 @@ import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.RE
 public class HarmonyClient {
     private static final Logger logger = LoggerFactory.getLogger(HarmonyClient.class);
 
-    public static final int DEFAULT_REPLY_TIMEOUT = 5_000;
+    public static final int DEFAULT_REPLY_TIMEOUT = 30_000;
     public static final int START_ACTIVITY_REPLY_TIMEOUT = 30_000;
 
     private static final int DEFAULT_PORT = 5222;
@@ -91,6 +93,19 @@ public class HarmonyClient {
         return injector.getInstance(HarmonyClient.class);
     }
 
+    public void disconnect(){
+    	if(connection != null){
+	    	try {
+				connection.disconnect();
+			} catch (NotConnectedException ignored) {
+				logger.debug("Connection is already closed.");
+			}
+    	}
+    	if (heartbeat != null) {
+            heartbeat.cancel(false);
+        }
+    }
+    
     public void connect(String host, String username, String password) {
         // First get a login token from Logitech
         LoginToken loginToken = authService.getLoginToken(username, password);
@@ -114,18 +129,46 @@ public class HarmonyClient {
             connection.connect();
             connection.login(oaResponse.getUsername(), oaResponse.getPassword(), "main");
             connection.setFromMode(FromMode.USER);
+            connection.addConnectionListener(new ConnectionListener() {
+				
+				@Override
+				public void reconnectionSuccessful() {
+					getCurrentActivity();
+				}
+				
+				@Override
+				public void connected(XMPPConnection connection) {
+				}
 
+				@Override
+				public void authenticated(XMPPConnection connection) {
+				}
+
+				@Override
+				public void connectionClosed() {
+				}
+
+				@Override
+				public void connectionClosedOnError(Exception e) {
+				}
+
+				@Override
+				public void reconnectingIn(int seconds) {
+				}
+
+				@Override
+				public void reconnectionFailed(Exception e) {
+				}
+				
+			});
+            
             heartbeat = scheduler.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if (!connection.isConnected()) {
-                            if (heartbeat != null) {
-                                heartbeat.cancel(false);
-                            }
-                            return;
-                        }
-                        sendPing();
+                    	if(connection.isConnected()){
+                    		sendPing();
+                    	}
                     } catch (Exception e) {
                         logger.warn("Send heartbeat failed", e);
                     }
