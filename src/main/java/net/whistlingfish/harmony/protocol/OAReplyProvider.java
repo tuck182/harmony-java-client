@@ -1,9 +1,7 @@
 package net.whistlingfish.harmony.protocol;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthReplyParser;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReplyParser;
