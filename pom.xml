@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>net.whistlingfish</groupId>
+	<groupId>com.github.bwssystems</groupId>
 	<artifactId>harmony-java-client</artifactId>
-	<version>1.0.5</version>
+	<version>1.0.6</version>
 	<packaging>jar</packaging>
 
 	<name>Java Harmony Hub Client</name>
