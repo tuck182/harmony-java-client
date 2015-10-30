@@ -5,7 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'osgi'
 
 group = 'net.whistlingfish'
-version = '1.0.8'
+version = '1.0.9'
 
 sourceCompatibility = 1.7
 
@@ -83,6 +83,7 @@ jar {
 
 task allJar(type: Jar) {
     baseName = "harmony-java-client"
+    archivesBaseName = "harmony-java-client"
     classifier = "all"
     
     from sourceSets.main.output
@@ -94,6 +95,7 @@ task allJar(type: Jar) {
 
 task openhabJar(type: Jar) {
     baseName = "harmony-java-client"
+    archivesBaseName = "harmony-java-client"
     classifier = "openhab"
     
     from sourceSets.main.output
