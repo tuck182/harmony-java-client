@@ -109,7 +109,11 @@ public class HarmonyClient {
     public void connect(String host, String username, String password) {
         // First get a login token from Logitech
         LoginToken loginToken = authService.getLoginToken(username, password);
-
+        connect(host, loginToken);
+    }
+    
+    public void connect(String host, LoginToken loginToken) {
+       
         ConnectionConfiguration connectionConfig = createConnectionConfig(host, DEFAULT_PORT);
         XMPPTCPConnection authConnection = new XMPPTCPConnection(connectionConfig);
         try {
