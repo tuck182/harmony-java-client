@@ -16,6 +16,8 @@ public abstract class OAReplyParser {
 	 static {
 		 validResponses.add("100");
 		 validResponses.add("200");
+		 validResponses.add("506"); //bluetooth not connected 
+		 validResponses.add("566"); //Command not found for device, recoverable
 	 }
 	    
     public abstract IQ parseReplyContents(String statusCode, String errorString, String contents);
