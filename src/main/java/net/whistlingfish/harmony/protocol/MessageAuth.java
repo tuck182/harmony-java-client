@@ -19,20 +19,19 @@ public class MessageAuth {
      * Request
      */
     public static class AuthRequest extends OAPacket {
-        private LoginToken loginToken;
 
-        public AuthRequest(LoginToken loginToken) {
+        public AuthRequest() {
             super(MIME_TYPE);
-            this.loginToken = loginToken;
             setType(IQ.Type.GET);
         }
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
-            return ImmutableMap.<String, Object> builder() //
-                    .put("token", loginToken.getUserAuthToken())
+       		return ImmutableMap.<String, Object> builder() //
+                    .put("method", "pair")
                     .put("name", generateUniqueId() + "#" + getDeviceIdentifier())
                     .build();
+      		
         }
 
         private String generateUniqueId() {
