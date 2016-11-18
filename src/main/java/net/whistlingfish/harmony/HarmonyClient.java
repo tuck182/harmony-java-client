@@ -108,7 +108,7 @@ public class HarmonyClient {
     
     public void connect(String host, String username, String password) {
         // First get a login token from Logitech
-        LoginToken loginToken = authService.getLoginToken(username, password);
+        // LoginToken loginToken = authService.getLoginToken(username, password);
 
         ConnectionConfiguration connectionConfig = createConnectionConfig(host, DEFAULT_PORT);
         XMPPTCPConnection authConnection = new XMPPTCPConnection(connectionConfig);
@@ -119,7 +119,7 @@ public class HarmonyClient {
             authConnection.login(DEFAULT_XMPP_USER, DEFAULT_XMPP_PASSWORD, "auth");
             authConnection.setFromMode(FromMode.USER);
 
-            AuthRequest sessionRequest = createSessionRequest(loginToken);
+            AuthRequest sessionRequest = createPairSessionRequest();
             AuthReply oaResponse = sendOAPacket(authConnection, sessionRequest, AuthReply.class);
 
             authConnection.disconnect();
@@ -322,6 +322,10 @@ public class HarmonyClient {
 
     private AuthRequest createSessionRequest(LoginToken loginToken) {
         return new AuthRequest(loginToken);
+    }
+
+    private AuthRequest createPairSessionRequest() {
+        return new AuthRequest("pair");
     }
 
     public void sendPing() {
