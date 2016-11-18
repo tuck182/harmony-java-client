@@ -98,8 +98,14 @@ public class HarmonyClient {
             heartbeat.cancel(false);
         }
     }
-    
+
+    // This method is for backwards compatibility
     public void connect(String host, String username, String password) {
+    	this.connect(host);
+    }
+    
+    // No need for username password with pair method
+    public void connect(String host) {
         ConnectionConfiguration connectionConfig = createConnectionConfig(host, DEFAULT_PORT);
         XMPPTCPConnection authConnection = new XMPPTCPConnection(connectionConfig);
         try {
