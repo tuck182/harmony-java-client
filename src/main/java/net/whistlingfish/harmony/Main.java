@@ -1,12 +1,11 @@
 package net.whistlingfish.harmony;
 
+import static java.lang.String.format;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import javax.inject.Inject;
-
-import net.whistlingfish.harmony.config.Activity;
-import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -14,7 +13,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.martiansoftware.jsap.CommandLineTokenizer;
 
-import static java.lang.String.format;
+import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 
 public class Main {
     @Inject
@@ -34,15 +34,16 @@ public class Main {
                 System.out.println(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
             }
         });
-        harmonyClient.connect(args[0], args[1], args[2]);
+        harmonyClient.connect(args[0]);
 
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         String line;
         while (true) {
             line = br.readLine();
-            if (line == null || line.equals("q"))
+            if (line == null || line.equals("q")) {
                 break;
+            }
 
             try {
                 String[] lineArgs = CommandLineTokenizer.tokenize(line);

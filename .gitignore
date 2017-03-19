@@ -5,3 +5,4 @@
 .settings
 .idea
 .gradle
+/target/

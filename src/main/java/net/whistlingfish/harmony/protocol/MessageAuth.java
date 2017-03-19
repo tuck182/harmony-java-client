@@ -1,5 +1,8 @@
 package net.whistlingfish.harmony.protocol;
 
+import static java.lang.String.format;
+import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,28 +12,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 
-import static java.lang.String.format;
-import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
-
 public class MessageAuth {
     public static String MIME_TYPE = "vnd.logitech.connect/vnd.logitech.pair";
 
     /*
      * Request
      */
-    public static class AuthRequest extends OAPacket {
+    public static class AuthRequest extends OAStanza {
         private LoginToken loginToken;
 
         public AuthRequest(LoginToken loginToken) {
             super(MIME_TYPE);
             this.loginToken = loginToken;
-            setType(IQ.Type.GET);
+            setType(IQ.Type.get);
         }
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
             return ImmutableMap.<String, Object> builder() //
-                    .put("token", loginToken.getUserAuthToken())
+                    .put(loginToken != null ? "token" : "method", 
+                            loginToken!= null ? loginToken.getUserAuthToken() : "pair")
                     .put("name", generateUniqueId() + "#" + getDeviceIdentifier())
                     .build();
         }
@@ -47,7 +48,7 @@ public class MessageAuth {
     /*
      * Reply
      */
-    public static class AuthReply extends OAPacket {
+    public static class AuthReply extends OAStanza {
         private String serverIdentity;
         private String hubId;
         private String identity;
