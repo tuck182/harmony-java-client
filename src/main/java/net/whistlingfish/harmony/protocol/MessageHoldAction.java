@@ -42,7 +42,7 @@ public class MessageHoldAction {
     /*
      * Reply (unused)
      */
-    public static class HoldActionReply extends OAPacket {
+    public static class HoldActionReply extends OAStanza {
         public HoldActionReply() {
             super(MIME_TYPE);
         }

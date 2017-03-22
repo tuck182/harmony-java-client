@@ -29,7 +29,7 @@ public class MessagePing {
     /*
      * Reply
      */
-    public static class PingReply extends OAPacket {
+    public static class PingReply extends OAStanza {
         public PingReply() {
             super(MIME_TYPE);
         }

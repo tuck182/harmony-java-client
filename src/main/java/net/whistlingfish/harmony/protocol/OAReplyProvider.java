@@ -1,9 +1,13 @@
 package net.whistlingfish.harmony.protocol;
 
+import static java.lang.String.format;
+
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.provider.IQProvider;
+import org.xmlpull.v1.XmlPullParser;
 
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthReplyParser;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReplyParser;
@@ -12,13 +16,7 @@ import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionReplyParse
 import net.whistlingfish.harmony.protocol.MessagePing.PingReplyParser;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReplyParser;
 
-import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.provider.IQProvider;
-import org.xmlpull.v1.XmlPullParser;
-
-import static java.lang.String.format;
-
-public class OAReplyProvider implements IQProvider {
+public class OAReplyProvider extends IQProvider<IQ> {
     private static Map<String, OAReplyParser> replyParsers = new HashMap<>();
     static {
         replyParsers.put(MessageAuth.MIME_TYPE, new AuthReplyParser());
@@ -30,14 +28,8 @@ public class OAReplyProvider implements IQProvider {
         replyParsers.put(MessagePing.MIME_TYPE, new PingReplyParser());
     }
 
-//    private static Set<String> validResponses = new HashSet<>();
-//    static {
-//        validResponses.add("100");
-//        validResponses.add("200");
-//    }
-
     @Override
-    public IQ parseIQ(XmlPullParser parser) throws Exception {
+    public IQ parse(XmlPullParser parser, int initialDepth) throws Exception {
         String elementName = parser.getName();
 
         Map<String, String> attrs = new HashMap<>();
@@ -58,25 +50,26 @@ public class OAReplyProvider implements IQProvider {
             throw new HarmonyProtocolException(format("Unable to handle reply type '%s'", mimeType));
         }
         if (!replyParser.validResponseCode(statusCode)) {
-            throw new HarmonyProtocolException(format("Got error response [%s]: %s", statusCode,
-                    attrs.get("errorstring")));
+            throw new HarmonyProtocolException(
+                    format("Got error response [%s]: %s", statusCode, attrs.get("errorstring")));
         }
 
         StringBuilder contents = new StringBuilder();
         boolean done = false;
         while (!done) {
             switch (parser.next()) {
-            case XmlPullParser.END_TAG:
-                if (parser.getName().equals(elementName)) {
-                    done = true;
+                case XmlPullParser.END_TAG:
+                    if (parser.getName().equals(elementName)) {
+                        done = true;
+                        break;
+                    }
+                    // otherwise fall through to default
+                default:
+                    contents.append(parser.getText());
                     break;
-                }
-                // otherwise fall through to default
-            default:
-                contents.append(parser.getText());
-                break;
             }
         }
         return replyParser.parseReplyContents(statusCode, errorString, contents.toString());
     }
+
 }
