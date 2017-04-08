@@ -18,7 +18,7 @@ public class EmptyIncrementedIdReplyFilter implements StanzaFilter {
     private final AndFilter filter;
 
     public EmptyIncrementedIdReplyFilter(OAStanza request, XMPPTCPConnection connection) {
-        StanzaFilter iqFilter = new OrFilter(IQTypeFilter.ERROR, IQTypeFilter.GET);
+        StanzaFilter iqFilter = new OrFilter(IQTypeFilter.ERROR, IQTypeFilter.RESULT);
         StanzaFilter idFilter = new StanzaIdFilter(incrementStanzaId(request));
         filter = new AndFilter(iqFilter, idFilter);
     }
