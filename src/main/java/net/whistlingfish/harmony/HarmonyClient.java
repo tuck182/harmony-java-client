@@ -27,7 +27,6 @@ import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.Bind;
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Stanza;
-import org.jivesoftware.smack.packet.XMPPError.Condition;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.sm.predicates.ForEveryStanza;
@@ -46,7 +45,7 @@ import net.whistlingfish.harmony.config.Device;
 import net.whistlingfish.harmony.config.HarmonyConfig;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
 import net.whistlingfish.harmony.protocol.HarmonyBindIQProvider;
-import net.whistlingfish.harmony.protocol.HarmonyExceptionLoggingCallback;
+import net.whistlingfish.harmony.protocol.HarmonyXMPPTCPConnection;
 import net.whistlingfish.harmony.protocol.LoginToken;
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthReply;
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthRequest;
@@ -74,7 +73,7 @@ public class HarmonyClient {
     private static final String DEFAULT_XMPP_PASSWORD = "gatorade.";
 
     private boolean smackConfigured;
-    private XMPPTCPConnection connection;
+    private HarmonyXMPPTCPConnection connection;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> heartbeat;
 
@@ -119,34 +118,24 @@ public class HarmonyClient {
         configureSmack();
 
         XMPPTCPConnectionConfiguration connectionConfig = createConnectionConfig(host, DEFAULT_PORT);
-        XMPPTCPConnection authConnection = new XMPPTCPConnection(connectionConfig);
+        HarmonyXMPPTCPConnection authConnection = new HarmonyXMPPTCPConnection(connectionConfig);
         try {
             addPacketLogging(authConnection, "auth");
 
             authConnection.connect();
             authConnection.login(DEFAULT_XMPP_USER, DEFAULT_XMPP_PASSWORD, Resourcepart.from("auth"));
             authConnection.setFromMode(FromMode.USER);
-            authConnection.setParsingExceptionCallback(new HarmonyExceptionLoggingCallback());
 
             AuthRequest sessionRequest = createSessionRequest(loginToken);
             AuthReply oaResponse = sendOAStanza(authConnection, sessionRequest, AuthReply.class);
 
             authConnection.disconnect();
 
-            connection = new XMPPTCPConnection(connectionConfig) {
-                @Override
-                public void sendStanza(Stanza stanza) throws NotConnectedException, InterruptedException {
-                    if (stanza.getError() == null
-                            || stanza.getError().getCondition() != Condition.service_unavailable) {
-                        super.sendStanza(stanza);
-                    }
-                }
-            };
+            connection = new HarmonyXMPPTCPConnection(connectionConfig);
             addPacketLogging(connection, "main");
             connection.connect();
             connection.login(oaResponse.getUsername(), oaResponse.getPassword(), Resourcepart.from("main"));
             connection.setFromMode(FromMode.USER);
-            connection.setParsingExceptionCallback(new HarmonyExceptionLoggingCallback());
             connection.addConnectionListener(new ConnectionListener() {
 
                 @Override
