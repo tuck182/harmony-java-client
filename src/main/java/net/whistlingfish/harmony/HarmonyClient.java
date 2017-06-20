@@ -44,9 +44,11 @@ import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.config.Device;
 import net.whistlingfish.harmony.config.HarmonyConfig;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
+
 import net.whistlingfish.harmony.protocol.HarmonyBindIQProvider;
 import net.whistlingfish.harmony.protocol.HarmonyXMPPTCPConnection;
 import net.whistlingfish.harmony.protocol.LoginToken;
+
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthReply;
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthRequest;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReply;
@@ -119,9 +121,11 @@ public class HarmonyClient {
 
         XMPPTCPConnectionConfiguration connectionConfig = createConnectionConfig(host, DEFAULT_PORT);
         HarmonyXMPPTCPConnection authConnection = new HarmonyXMPPTCPConnection(connectionConfig);
+
         try {
             addPacketLogging(authConnection, "auth");
 
+            // Pair with the local hub and get the token
             authConnection.connect();
             authConnection.login(DEFAULT_XMPP_USER, DEFAULT_XMPP_PASSWORD, Resourcepart.from("auth"));
             authConnection.setFromMode(FromMode.USER);
@@ -325,8 +329,8 @@ public class HarmonyClient {
         return config;
     }
 
-    private AuthRequest createSessionRequest(LoginToken loginToken) {
-        return new AuthRequest(loginToken);
+    private AuthRequest createPairSessionRequest() {
+        return new AuthRequest();
     }
 
     public void sendPing() {

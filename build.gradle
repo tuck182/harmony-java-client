@@ -5,6 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'osgi'
 
 group = 'net.whistlingfish'
+
 version = '1.1.1'
 
 sourceCompatibility = 1.7
@@ -25,6 +26,7 @@ configurations {
 
 dependencies {
     // basic libraries
+
     compile 'com.google.guava:guava:21.0'
     compile 'com.fasterxml.jackson.core:jackson-core:2.8.7'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
@@ -36,6 +38,7 @@ dependencies {
     compile 'com.google.inject:guice:4.1.0'
     
     // XMPP
+
     compile 'org.igniterealtime.smack:smack-core:4.2.0'
     compile 'org.igniterealtime.smack:smack-java7:4.2.0'
     compile 'org.igniterealtime.smack:smack-tcp:4.2.0'
@@ -82,7 +85,8 @@ jar {
 }
 
 task allJar(type: Jar) {
-    baseName = "$project.name"
+    baseName = "harmony-java-client"
+    archivesBaseName = "harmony-java-client"
     classifier = "all"
     
     from sourceSets.main.output
@@ -93,7 +97,8 @@ task allJar(type: Jar) {
 }
 
 task openhabJar(type: Jar) {
-    baseName = "$project.name"
+    baseName = "harmony-java-client"
+    archivesBaseName = "harmony-java-client"
     classifier = "openhab"
     
     from sourceSets.main.output

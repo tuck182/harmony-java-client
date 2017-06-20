@@ -18,10 +18,11 @@ public class MessageAuth {
     /*
      * Request
      */
+
     public static class AuthRequest extends OAStanza {
         private LoginToken loginToken;
 
-        public AuthRequest(LoginToken loginToken) {
+        public AuthRequest() {
             super(MIME_TYPE);
             this.loginToken = loginToken;
             setType(IQ.Type.get);
@@ -29,11 +30,13 @@ public class MessageAuth {
 
         @Override
         protected Map<String, Object> getChildElementPairs() {
+
             return ImmutableMap.<String, Object> builder() //
                     .put(loginToken != null ? "token" : "method", 
                             loginToken!= null ? loginToken.getUserAuthToken() : "pair")
                     .put("name", generateUniqueId() + "#" + getDeviceIdentifier())
                     .build();
+      		
         }
 
         private String generateUniqueId() {
