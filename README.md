@@ -33,4 +33,4 @@ Example
 
 2. Execute the jar:
 
-   `$ java -jar build/libs/harmony-client-all-*.jar HARMONY_HOST LOGITECH_USERNAME LOGITECH_PASSWORD`
+   `$ java -jar build/libs/harmony-java-client-*-all.jar HARMONY_HOST`
