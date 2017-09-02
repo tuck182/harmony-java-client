@@ -366,8 +366,10 @@ public class HarmonyClient {
         if (getConfig().getActivityById(activityId) == null) {
             throw new IllegalArgumentException(format("Unknown activity '%d'", activityId));
         }
-        sendOAStanza(connection, new StartActivityRequest(activityId), StartActivityReply.class,
-                START_ACTIVITY_REPLY_TIMEOUT);
+        if (currentActivity == null || currentActivity.getId() != activityId) {
+        	sendOAStanza(connection, new StartActivityRequest(activityId), StartActivityReply.class,
+        			START_ACTIVITY_REPLY_TIMEOUT);
+        }
     }
 
     public void startActivityByName(String label) {
@@ -375,6 +377,8 @@ public class HarmonyClient {
         if (activity == null) {
             throw new IllegalArgumentException(format("Unknown activity '%s'", label));
         }
-        startActivity(activity.getId());
+        if (currentActivity == null || !label.equals(currentActivity.getLabel())) {
+        	startActivity(activity.getId());
+        }
     }
 }
