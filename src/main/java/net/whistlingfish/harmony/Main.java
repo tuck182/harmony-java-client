@@ -14,6 +14,7 @@ import com.google.inject.Injector;
 import com.martiansoftware.jsap.CommandLineTokenizer;
 
 import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.config.Activity.Status;
 import net.whistlingfish.harmony.shell.ShellCommandWrapper;
 
 public class Main {
@@ -32,6 +33,13 @@ public class Main {
             @Override
             public void activityStarted(Activity activity) {
                 System.out.println(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
+            }
+        });
+        harmonyClient.addListener(new ActivityStatusListener() {
+            @Override
+            public void activityStatusChanged(Activity activity, Status status) {
+                System.out.println(format("activity status changed: [%d] %s - %s", activity.getId(), 
+                        activity.getLabel(), status.toString()));               
             }
         });
         harmonyClient.connect(args[0]);

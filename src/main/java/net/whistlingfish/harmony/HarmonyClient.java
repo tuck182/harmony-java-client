@@ -1,7 +1,8 @@
 package net.whistlingfish.harmony;
 
 import static java.lang.String.format;
-import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.*;
+import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.PRESS;
+import static net.whistlingfish.harmony.protocol.MessageHoldAction.HoldStatus.RELEASE;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -41,9 +42,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.config.Activity.Status;
 import net.whistlingfish.harmony.config.Device;
 import net.whistlingfish.harmony.config.HarmonyConfig;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
+import net.whistlingfish.harmony.protocol.EventStanza;
 import net.whistlingfish.harmony.protocol.HarmonyBindIQProvider;
 import net.whistlingfish.harmony.protocol.HarmonyXMPPTCPConnection;
 import net.whistlingfish.harmony.protocol.LoginToken;
@@ -88,6 +91,7 @@ public class HarmonyClient {
     private Activity currentActivity;
 
     private Set<ActivityChangeListener> activityChangeListeners = new HashSet<>();
+    private Set<ActivityStatusListener> activityStatusListeners = new HashSet<>();
 
     public static HarmonyClient getInstance() {
         Injector injector = Guice.createInjector(new HarmonyClientModule());
@@ -194,7 +198,28 @@ public class HarmonyClient {
         connection.addSyncStanzaListener(new StanzaListener() {
             @Override
             public void processStanza(Stanza stanza) throws NotConnectedException {
-                updateCurrentActivity(getCurrentActivity());
+            	EventStanza event = EventStanza.create(stanza);
+            	if (event == null)
+            	{
+                    logger.debug("Error processing message stanza.");
+                    return;
+            	}
+                logger.debug("Received event: type={}, id={}, status={}, error={}", 
+                        event.getEventType(), event.getActivityId(), event.getActivityStatus(), event.getErrorCode());
+
+                Integer id = event.getActivityId();
+                if (event.getErrorCode() == 200 && id != null) {
+                    switch (event.getEventType()) {
+                        case START_ACTIVITY_FINISHED:
+                            updateCurrentActivity(getConfig().getActivityById(id));
+                            break;
+                        case STATE_DIGEST:
+                            updateActivityStatus(getConfig().getActivityById(id), event.getActivityStatus());
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }, new StanzaFilter() {
             @Override
@@ -219,6 +244,17 @@ public class HarmonyClient {
         return currentActivity;
     }
 
+    private synchronized Status updateActivityStatus(Activity activity, Status status) {
+        if (status != Status.UNKNOWN && status != activity.getStatus()) {
+            activity.setStatus(status);
+            for (ActivityStatusListener listener : activityStatusListeners) {
+                logger.debug("status listener[{}] notified: {} - {}", listener, currentActivity, status);
+                listener.activityStatusChanged(activity, status);
+            }
+        }
+        return activity.getStatus();
+    }
+
     public void addListener(HarmonyHubListener listener) {
         listener.addTo(this);
     }
@@ -238,6 +274,23 @@ public class HarmonyClient {
 
     public void removeListener(ActivityChangeListener activityChangeListener) {
         activityChangeListeners.remove(activityChangeListener);
+    }
+
+    public synchronized void addListener(ActivityStatusListener listener) {
+        logger.debug("status listener[{}] added", listener);
+        activityStatusListeners.add(listener);
+        if (currentActivity != null)
+        {
+            Status status = currentActivity.getStatus();
+            if (status != Status.UNKNOWN) {
+                logger.debug("status listener[{}] notified: {}", listener, currentActivity);
+                listener.activityStatusChanged(currentActivity, status);
+            }
+        }
+    }
+
+    public void removeListener(ActivityStatusListener activityStatusListener) {
+        activityStatusListeners.remove(activityStatusListener);
     }
 
     private Stanza sendOAStanza(XMPPTCPConnection authConnection, OAStanza stanza) {

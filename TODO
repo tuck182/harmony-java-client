@@ -1,3 +1,0 @@
-Implement state digest:
-<iq id="x0M38-161" from="7b1466ad-1e7f-440f-1e4b-c1f74883096e" type="get"><oa xmlns='connect.logitech.com' mime='connect.statedigest?get'></oa></iq>
-<iq id="x0M38-161" to="7b1466ad-1e7f-440f-1e4b-c1f74883096e" type="get"><oa xmlns='connect.logitech.com' mime='connect.statedigest?get' errorcode='200' errorstring='OK'><![CDATA[sleepTimerId=-1:configVersion=107:contentVersion=79:activityId=7663318:mode=3:discoveryServer=http://svcs.myharmony.com/Discovery/Discovery.svc:wifiStatus=1:activityStatus=2:syncStatus=0:updates=table: 0x4f2ab8:stateVersion=63:hubSwVersion=3.7.37:hubUpdate=true:sequence=false:accountId=4495137]]></oa></iq>

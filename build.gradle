@@ -29,6 +29,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:2.8.7'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
     compile 'org.slf4j:slf4j-api:1.7.24'
+    compile 'com.google.code.gson:gson:2.5'
     provided 'ch.qos.logback:logback-core:1.2.1'
     provided 'ch.qos.logback:logback-classic:1.2.1'
 
