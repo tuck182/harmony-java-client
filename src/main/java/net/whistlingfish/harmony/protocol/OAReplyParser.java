@@ -28,10 +28,14 @@ public abstract class OAReplyParser {
      */
     static final Pattern kvRE = Pattern.compile("(.*?)=(.*)");
 
-    protected Map<String, Object> parseKeyValuePairs(String statusCode, String errorString, String contents) {
+    protected static Map<String, Object> parseKeyValuePairs(String statusCode, String errorString, String contents) {
         Map<String, Object> params = new HashMap<>();
-        params.put("statusCode", statusCode);
-        params.put("errorString", errorString);
+        if (statusCode != null) {
+            params.put("statusCode", statusCode);
+        }
+        if (errorString != null) {
+            params.put("errorString", errorString);
+        }
         for (String pair : contents.split(":")) {
             Matcher matcher = kvRE.matcher(pair);
             if (!matcher.matches()) {
@@ -51,7 +55,7 @@ public abstract class OAReplyParser {
         return params;
     }
 
-    protected Map<String, Object> parsePseudoJson(String value) {
+    protected static Map<String, Object> parsePseudoJson(String value) {
         Map<String, Object> params = new HashMap<>();
         value = value.substring(1, value.length() - 1);
         for (String pair : value.split(", ?")) {
@@ -64,7 +68,7 @@ public abstract class OAReplyParser {
         return params;
     }
 
-    private Object parsePseudoJsonValue(String value) {
+    private static Object parsePseudoJsonValue(String value) {
         switch (value.charAt(0)) {
             case '{':
                 return parsePseudoJsonValue(value);

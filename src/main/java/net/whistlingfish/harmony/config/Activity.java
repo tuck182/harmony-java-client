@@ -1,14 +1,13 @@
 package net.whistlingfish.harmony.config;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static java.lang.String.format;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
 
 public class Activity {
     private String label;
@@ -23,6 +22,23 @@ public class Activity {
     private String type;
     private String icon;
     private String baseImageUri;
+    private Status status;
+    
+    public enum Status {
+    	HUB_IS_OFF,
+    	ACTIVITY_IS_STARTING,
+    	ACTIVITY_IS_STARTED,
+    	HUB_IS_TURNING_OFF,
+    	UNKNOWN
+    }
+    
+    public Status getStatus() {
+    	return status;
+    }
+    
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public String getLabel() {
         return label;
