@@ -248,7 +248,7 @@ public class HarmonyClient {
         if (status != Status.UNKNOWN && status != activity.getStatus()) {
             activity.setStatus(status);
             for (ActivityStatusListener listener : activityStatusListeners) {
-                logger.debug("status listener[{}] notified: {} - {}", listener, currentActivity, status);
+                logger.debug("status listener[{}] notified: {} - {}", listener, activity, status);
                 listener.activityStatusChanged(activity, status);
             }
         }

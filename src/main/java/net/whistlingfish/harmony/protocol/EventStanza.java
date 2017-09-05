@@ -2,15 +2,14 @@ package net.whistlingfish.harmony.protocol;
 
 import static net.whistlingfish.harmony.Jackson.OBJECT_MAPPER;
 
+import java.io.IOException;
+
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.StandardExtensionElement;
 import org.jivesoftware.smack.packet.Stanza;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 import net.whistlingfish.harmony.config.Activity.Status;
 
@@ -24,7 +23,6 @@ public class EventStanza  {
     private Integer activityStatus;
     
     private EventType eventType;
-    private static final Gson gson = new Gson();
     
     public enum EventType {
         STATE_DIGEST,
@@ -96,14 +94,11 @@ public class EventStanza  {
         {
             if (content != null) {
                 try {
-                    EventStanza event;
-                    synchronized(gson) {
-                        event = gson.fromJson(content, EventStanza.class);
-                    }
+                    EventStanza event = OBJECT_MAPPER.readValue(content, EventStanza.class);
                     event.eventType = EventType.STATE_DIGEST;
                     return event;
-                } catch (JsonSyntaxException e) {
-                    logger.debug("Exception parsing stateDigest: {}", e.getMessage());
+                } catch (IOException e) {
+                    logger.error("Exception parsing stateDigest: {}", e.getMessage());
                 }
             }
         } else if (type.equals("harmony.engine?startActivityFinished")) {
