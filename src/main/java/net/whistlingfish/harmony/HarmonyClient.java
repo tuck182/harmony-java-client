@@ -396,12 +396,30 @@ public class HarmonyClient {
         sendOAStanza(connection, new HoldActionRequest(deviceId, button, RELEASE));
     }
 
+    public void pressButton(int deviceId, String button, int pressTime) {
+        sendOAStanza(connection, new HoldActionRequest(deviceId, button, PRESS));
+        try {
+            Thread.sleep(pressTime);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        sendOAStanza(connection, new HoldActionRequest(deviceId, button, RELEASE));
+    }
+
     public void pressButton(String deviceName, String button) {
         Device device = getConfig().getDeviceByName(deviceName);
         if (device == null) {
             throw new IllegalArgumentException(format("Unknown device '%s'", deviceName));
         }
         pressButton(device.getId(), button);
+    }
+
+    public void pressButton(String deviceName, String button, int pressTime) {
+        Device device = getConfig().getDeviceByName(deviceName);
+        if (device == null) {
+            throw new IllegalArgumentException(format("Unknown device '%s'", deviceName));
+        }
+        pressButton(device.getId(), button, pressTime);
     }
 
     public Map<Integer, String> getDeviceLabels() {
