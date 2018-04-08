@@ -22,7 +22,7 @@ public class Activity {
     private String type;
     private String icon;
     private String baseImageUri;
-    private Status status;
+    private Status status = Status.UNKNOWN;
     
     public enum Status {
     	HUB_IS_OFF,

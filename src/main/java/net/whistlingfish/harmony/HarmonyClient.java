@@ -245,8 +245,22 @@ public class HarmonyClient {
     }
 
     private synchronized Status updateActivityStatus(Activity activity, Status status) {
-        if (status != Status.UNKNOWN && status != activity.getStatus()) {
-            activity.setStatus(status);
+        boolean newStatus = false;
+        if (status == Status.HUB_IS_OFF) {
+            // HUB_IS_OFF is a special status received on PowerOff activity only, 
+            // but it affects the status of all activities
+            for (Activity act : getConfig().getActivities()) {
+                if (act.getStatus() != status) {
+                    newStatus = true;
+                    act.setStatus(status);
+                }
+            }
+        } else if (status != Status.UNKNOWN && status != activity.getStatus()) {
+                newStatus = true;
+                activity.setStatus(status);
+        }
+        // inform listeners only if status was changed - avoid duplicate notifications
+        if (newStatus) {
             for (ActivityStatusListener listener : activityStatusListeners) {
                 logger.debug("status listener[{}] notified: {} - {}", listener, activity, status);
                 listener.activityStatusChanged(activity, status);

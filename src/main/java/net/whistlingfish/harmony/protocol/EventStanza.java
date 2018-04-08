@@ -94,7 +94,12 @@ public class EventStanza  {
         {
             if (content != null) {
                 try {
+                    logger.debug("stateDigest notify content: {}", content);
                     EventStanza event = OBJECT_MAPPER.readValue(content, EventStanza.class);
+                    // if error code is ommitted in the stanza, we assume it was successful
+                    if (event.errorCode == null) {
+                        event.errorCode = "200";
+                    }
                     event.eventType = EventType.STATE_DIGEST;
                     return event;
                 } catch (IOException e) {

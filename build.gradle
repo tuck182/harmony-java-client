@@ -5,7 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'osgi'
 
 group = 'net.whistlingfish'
-version = '1.2.1'
+version = '1.2.2'
 
 sourceCompatibility = 1.7
 
